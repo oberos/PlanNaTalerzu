@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Składniki{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="h3 fw-bold mb-0">
+                        {% if editing_ingredient %}Edytuj składnik{% else %}Dodaj składnik{% endif %}
+                    </h1>
+                    {% if editing_ingredient %}
+                    <a class="btn btn-outline-secondary btn-sm" href="{% url 'recipes:ingredients' %}">Anuluj</a>
+                    {% endif %}
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="{% if editing_ingredient %}update{% else %}create{% endif %}">
+                    {% if editing_ingredient %}
+                    <input type="hidden" name="ingredient_id" value="{{ editing_ingredient.pk }}">
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Nazwa</label>
+                        <input class="form-control" id="name" name="name" value="{{ editing_ingredient.name|default:'' }}" required>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="category">Kategoria</label>
+                            <input class="form-control" id="category" name="category" value="{{ editing_ingredient.category|default:'' }}" placeholder="np. nabiał, warzywa">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="default_unit">Domyślna jednostka</label>
+                            <select class="form-select" id="default_unit" name="default_unit">
+                                <option value="g" {% if editing_ingredient.default_unit == 'g' %}selected{% endif %}>g (gramy)</option>
+                                <option value="kg" {% if editing_ingredient.default_unit == 'kg' %}selected{% endif %}>kg (kilogramy)</option>
+                                <option value="ml" {% if editing_ingredient.default_unit == 'ml' %}selected{% endif %}>ml (mililitry)</option>
+                                <option value="l" {% if editing_ingredient.default_unit == 'l' %}selected{% endif %}>l (litry)</option>
+                                <option value="szt" {% if editing_ingredient.default_unit == 'szt' %}selected{% endif %}>szt (sztuki)</option>
+                                <option value="łyżka" {% if editing_ingredient.default_unit == 'łyżka' %}selected{% endif %}>łyżka</option>
+                                <option value="łyżeczka" {% if editing_ingredient.default_unit == 'łyżeczka' %}selected{% endif %}>łyżeczka</option>
+                                <option value="szklanka" {% if editing_ingredient.default_unit == 'szklanka' %}selected{% endif %}>szklanka</option>
+                                <option value="szczypta" {% if editing_ingredient.default_unit == 'szczypta' %}selected{% endif %}>szczypta</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">🥗 Wartości odżywcze (na 100g/100ml)</label>
+                        <div class="card card-body bg-light py-3 px-3">
+                            <div class="row g-3">
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label small" for="calories">Kalorie (kcal)</label>
+                                    <input type="number" class="form-control" id="calories" name="calories" min="0" step="0.1" 
+                                        value="{% if editing_ingredient.nutrition %}{{ editing_ingredient.nutrition.calories }}{% endif %}" placeholder="0">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label small" for="protein">Białko (g)</label>
+                                    <input type="number" class="form-control" id="protein" name="protein" min="0" step="0.1" 
+                                        value="{% if editing_ingredient.nutrition %}{{ editing_ingredient.nutrition.protein }}{% endif %}" placeholder="0">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label small" for="carbohydrates">Węglowodany (g)</label>
+                                    <input type="number" class="form-control" id="carbohydrates" name="carbohydrates" min="0" step="0.1" 
+                                        value="{% if editing_ingredient.nutrition %}{{ editing_ingredient.nutrition.carbohydrates }}{% endif %}" placeholder="0">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label small" for="fat">Tłuszcze (g)</label>
+                                    <input type="number" class="form-control" id="fat" name="fat" min="0" step="0.1" 
+                                        value="{% if editing_ingredient.nutrition %}{{ editing_ingredient.nutrition.fat }}{% endif %}" placeholder="0">
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label small" for="fiber">Błonnik (g)</label>
+                                    <input type="number" class="form-control" id="fiber" name="fiber" min="0" step="0.1" 
+                                        value="{% if editing_ingredient.nutrition %}{{ editing_ingredient.nutrition.fiber }}{% endif %}" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="form-text mt-2">
+                                Pozostaw puste jeśli nie chcesz dodawać wartości odżywczych.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button class="btn btn-primary" type="submit">
+                            {% if editing_ingredient %}Zapisz zmiany{% else %}Dodaj składnik{% endif %}
+                        </button>
+                        <a class="btn btn-outline-secondary" href="{% url 'home' %}">Powrót do startu</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h3 fw-bold mb-0">Lista składników</h2>
+                    <span class="badge bg-light text-dark">{{ ingredients|length }} pozycji</span>
+                </div>
+
+                <!-- Wyszukiwanie -->
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="search-ingredients" placeholder="Szukaj składnika...">
+                </div>
+
+                {% if ingredients %}
+                <div class="list-group" id="ingredients-list">
+                    {% for ingredient in ingredients %}
+                    <div class="list-group-item px-0 py-3 border-0 border-bottom ingredient-item" data-name="{{ ingredient.name|lower }}" data-category="{{ ingredient.category|lower }}">
+                        <div class="d-flex justify-content-between gap-3 align-items-start">
+                            <div class="flex-grow-1">
+                                <h3 class="h6 fw-bold mb-1">{{ ingredient.name }}</h3>
+                                <div class="small text-muted">
+                                    {% if ingredient.category %}<span class="me-3">📁 {{ ingredient.category }}</span>{% endif %}
+                                    <span class="me-3">📏 {{ ingredient.default_unit|default:"g" }}</span>
+                                    {% if ingredient.nutrition %}
+                                    <span class="text-success">✓ Wartości odżywcze</span>
+                                    {% else %}
+                                    <span class="text-warning">○ Brak wartości odżywczych</span>
+                                    {% endif %}
+                                </div>
+                                {% if ingredient.nutrition %}
+                                <div class="mt-2">
+                                    <a class="fw-semibold small text-decoration-none" data-bs-toggle="collapse" 
+                                       href="#nutrition-{{ ingredient.pk }}" role="button" aria-expanded="false">
+                                        🥗 Pokaż wartości odżywcze
+                                    </a>
+                                    <div class="collapse mt-2" id="nutrition-{{ ingredient.pk }}">
+                                        <div class="card card-body bg-light py-2 px-3 small">
+                                            <div class="row">
+                                                <div class="col-6 col-md-4">Kalorie: <strong>{{ ingredient.nutrition.calories }} kcal</strong></div>
+                                                <div class="col-6 col-md-4">Białko: <strong>{{ ingredient.nutrition.protein }} g</strong></div>
+                                                <div class="col-6 col-md-4">Węglowodany: <strong>{{ ingredient.nutrition.carbohydrates }} g</strong></div>
+                                                <div class="col-6 col-md-4">Tłuszcze: <strong>{{ ingredient.nutrition.fat }} g</strong></div>
+                                                <div class="col-6 col-md-4">Błonnik: <strong>{{ ingredient.nutrition.fiber }} g</strong></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if ingredient.recipes.exists %}
+                                <div class="mt-1 small text-muted">
+                                    Używany w {{ ingredient.recipes.count }} przepis{{ ingredient.recipes.count|pluralize:"ie,ach" }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a class="btn btn-outline-primary btn-sm" href="{% url 'recipes:ingredients' %}?edit={{ ingredient.pk }}">Edytuj</a>
+                                <form method="post" class="d-inline" onsubmit="return confirm('Czy na pewno chcesz usunąć ten składnik?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="ingredient_id" value="{{ ingredient.pk }}">
+                                    <button class="btn btn-outline-danger btn-sm" type="submit">Usuń</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-muted">Brak składników. Dodaj pierwszy składnik.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-ingredients');
+    const ingredientItems = document.querySelectorAll('.ingredient-item');
+    
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        
+        ingredientItems.forEach(item => {
+            const name = item.dataset.name;
+            const category = item.dataset.category;
+            
+            if (name.includes(query) || category.includes(query)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

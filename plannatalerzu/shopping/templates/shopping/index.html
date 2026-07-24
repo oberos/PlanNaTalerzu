@@ -3,12 +3,168 @@
 {% block title %}Lista zakupów{% endblock %}
 
 {% block content %}
-<div class="card shadow-sm border-0 rounded-4">
-    <div class="card-body p-4 p-lg-5">
-        <h1 class="h2 fw-bold mb-3">Lista zakupów</h1>
-        <p class="text-muted mb-4">Tutaj będą generowane produkty z planu posiłków oraz możliwość oznaczania zakupionych
-            pozycji.</p>
-        <a class="btn btn-primary" href="{% url 'home' %}">Powrót do startu</a>
+<div class="row g-4">
+    <!-- Panel wyboru planu -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <h1 class="h4 fw-bold mb-3">Generuj listę zakupów</h1>
+                
+                <form method="get" class="mb-3">
+                    <div class="mb-3">
+                        <label for="plan-select" class="form-label">Wybierz plan posiłków</label>
+                        <select class="form-select" id="plan-select" name="plan">
+                            <option value="">-- wybierz plan --</option>
+                            {% for plan in available_plans %}
+                            <option value="{{ plan }}" {% if plan == selected_plan %}selected{% endif %}>{{ plan }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Generuj listę</button>
+                </form>
+                
+                {% if not available_plans %}
+                <div class="alert alert-info mb-0">
+                    <small>Brak planów posiłków. <a href="{% url 'planner:index' %}">Utwórz plan</a> aby wygenerować listę zakupów.</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lista zakupów -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h4 fw-bold mb-0">
+                        {% if selected_plan %}
+                        Lista zakupów: {{ selected_plan }}
+                        {% else %}
+                        Lista zakupów
+                        {% endif %}
+                    </h2>
+                    {% if shopping_list %}
+                    <span class="badge bg-primary">{{ shopping_list|length }} pozycji</span>
+                    {% endif %}
+                </div>
+                
+                {% if selected_plan and shopping_list %}
+                
+                {% for group in grouped_list %}
+                <div class="mb-4">
+                    <h3 class="h6 text-uppercase text-muted mb-2">
+                        <span class="badge bg-light text-dark">{{ group.category }}</span>
+                    </h3>
+                    <ul class="list-group">
+                        {% for item in group.items %}
+                        <li class="list-group-item d-flex align-items-center">
+                            <input type="checkbox" class="form-check-input me-3 shopping-checkbox" 
+                                   id="item-{{ item.ingredient_id }}" 
+                                   data-ingredient="{{ item.ingredient_id }}">
+                            <label class="flex-grow-1 mb-0 shopping-label" for="item-{{ item.ingredient_id }}">
+                                <span class="fw-semibold">{{ item.ingredient_name }}</span>
+                                <span class="text-muted">— {{ item.display_amount }} {{ item.display_unit }}</span>
+                            </label>
+                            {% if item.original_entries|length > 1 %}
+                            <button type="button" class="btn btn-sm btn-link text-muted p-0" 
+                                    data-bs-toggle="tooltip" 
+                                    title="{% for entry in item.original_entries %}{{ entry.amount }} {{ entry.unit }}{% if not forloop.last %} + {% endif %}{% endfor %}">
+                                <small>ⓘ</small>
+                            </button>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+                
+                <div class="mt-4 pt-3 border-top">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="clear-all-checkboxes">
+                        Wyczyść zaznaczenia
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm" id="select-all-checkboxes">
+                        Zaznacz wszystko
+                    </button>
+                </div>
+                
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Inicjalizacja tooltipów
+                    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                    tooltips.forEach(el => new bootstrap.Tooltip(el));
+                    
+                    // Przechowuj stan checkboxów w localStorage
+                    const storageKey = 'shopping_checked_{{ selected_plan|slugify }}';
+                    const checkboxes = document.querySelectorAll('.shopping-checkbox');
+                    
+                    // Załaduj zapisany stan
+                    const savedState = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                    checkboxes.forEach(cb => {
+                        const id = cb.dataset.ingredient;
+                        if (savedState[id]) {
+                            cb.checked = true;
+                            cb.closest('li').classList.add('opacity-50', 'text-decoration-line-through');
+                        }
+                    });
+                    
+                    // Zapisuj stan przy zmianie
+                    checkboxes.forEach(cb => {
+                        cb.addEventListener('change', function() {
+                            const id = this.dataset.ingredient;
+                            const state = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                            
+                            if (this.checked) {
+                                state[id] = true;
+                                this.closest('li').classList.add('opacity-50', 'text-decoration-line-through');
+                            } else {
+                                delete state[id];
+                                this.closest('li').classList.remove('opacity-50', 'text-decoration-line-through');
+                            }
+                            
+                            localStorage.setItem(storageKey, JSON.stringify(state));
+                        });
+                    });
+                    
+                    // Wyczyść wszystko
+                    document.getElementById('clear-all-checkboxes').addEventListener('click', function() {
+                        checkboxes.forEach(cb => {
+                            cb.checked = false;
+                            cb.closest('li').classList.remove('opacity-50', 'text-decoration-line-through');
+                        });
+                        localStorage.removeItem(storageKey);
+                    });
+                    
+                    // Zaznacz wszystko
+                    document.getElementById('select-all-checkboxes').addEventListener('click', function() {
+                        const state = {};
+                        checkboxes.forEach(cb => {
+                            cb.checked = true;
+                            cb.closest('li').classList.add('opacity-50', 'text-decoration-line-through');
+                            state[cb.dataset.ingredient] = true;
+                        });
+                        localStorage.setItem(storageKey, JSON.stringify(state));
+                    });
+                });
+                </script>
+                
+                {% elif selected_plan and not shopping_list %}
+                <div class="alert alert-warning mb-0">
+                    <strong>Plan "{{ selected_plan }}" jest pusty.</strong><br>
+                    <small>Dodaj przepisy do planu, aby wygenerować listę zakupów.</small>
+                </div>
+                
+                {% else %}
+                <p class="text-muted mb-4">Wybierz plan posiłków z listy po lewej stronie, aby wygenerować listę zakupów.</p>
+                <div class="text-center py-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="text-muted opacity-25 mb-3" viewBox="0 0 16 16">
+                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                    <p class="text-muted">Twoja lista zakupów pojawi się tutaj</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,13 +1,21 @@
 from itertools import groupby
 
 from django.shortcuts import redirect, render
-
 from recipes.models import Recipe
 
 from .models import DAY_CHOICES, MealPlan
 
-
 DAYS = [choice[1] for choice in DAY_CHOICES]
+
+
+def _get_calories_per_serving(recipe):
+    """Zwraca kalorie na porcję dla przepisu lub 0 jeśli brak danych."""
+    if recipe is None:
+        return 0
+    nutrition = recipe.calculate_nutrition()
+    if nutrition["total"]["has_nutrition_data"]:
+        return float(nutrition["per_serving"]["calories"])
+    return 0
 
 
 def planner_index(request):
@@ -44,11 +52,27 @@ def planner_index(request):
         return redirect("planner:index")
 
     edit_plan_name = request.GET.get("edit_plan", "").strip()
-    entries = MealPlan.objects.order_by("name")
+    entries = (
+        MealPlan.objects.select_related("recipe_dinner", "recipe_dinner_alternative", "recipe_supper")
+        .prefetch_related(
+            "recipe_dinner__ingredients__ingredient__nutrition",
+            "recipe_dinner_alternative__ingredients__ingredient__nutrition",
+            "recipe_supper__ingredients__ingredient__nutrition",
+        )
+        .order_by("name")
+    )
     order_map = {day: index for index, day in enumerate(DAYS)}
     planners = []
     for name, group in groupby(entries, key=lambda entry: entry.name):
         rows = sorted(list(group), key=lambda item: order_map.get(item.day_of_week, 0))
+        # Dodaj informacje o kaloriach do każdego wiersza
+        for row in rows:
+            dinner_cal = _get_calories_per_serving(row.recipe_dinner)
+            supper_cal = _get_calories_per_serving(row.recipe_supper)
+            alt_cal = _get_calories_per_serving(row.recipe_dinner_alternative)
+
+            row.calories_main = dinner_cal + supper_cal  # Obiad + Kolacja
+            row.calories_alt = alt_cal + supper_cal  # Alternatywa + Kolacja
         planners.append({"name": name, "rows": rows, "edit_mode": name == edit_plan_name})
 
     return render(
