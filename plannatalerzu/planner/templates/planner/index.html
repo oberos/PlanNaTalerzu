@@ -63,6 +63,7 @@
                             <th scope="col">Obiad</th>
                             <th scope="col">Kolacja</th>
                             <th scope="col">Alternatywa</th>
+                            <th scope="col" class="text-center" style="min-width: 120px;">Kalorie (kcal)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,6 +95,17 @@
                                     {% endfor %}
                                 </select>
                             </td>
+                            <td class="text-center small">
+                                {% if row.calories_main > 0 or row.calories_alt > 0 %}
+                                <span title="Obiad + Kolacja">{{ row.calories_main|floatformat:0 }}</span>
+                                {% if row.calories_alt > 0 and row.calories_alt != row.calories_main %}
+                                <span class="text-muted"> | </span>
+                                <span class="text-secondary" title="Alternatywa + Kolacja">{{ row.calories_alt|floatformat:0 }}</span>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -109,6 +121,7 @@
                         <th scope="col">Obiad</th>
                         <th scope="col">Kolacja</th>
                         <th scope="col">Alternatywa</th>
+                        <th scope="col" class="text-center" style="min-width: 120px;">Kalorie (kcal)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,7 +136,8 @@
                                 data-preparation-time="{{ row.recipe_dinner.preparation_time }}"
                                 data-servings="{{ row.recipe_dinner.servings }}"
                                 data-category="{{ row.recipe_dinner.category|default:'Brak kategorii'|escape }}"
-                                data-recipe-ingredients="{% for ingredient in row.recipe_dinner.ingredients.all %}{{ ingredient.ingredient.name }}{% if not forloop.last %}, {% endif %}{% empty %}Brak danych{% endfor %}">
+                                data-recipe-ingredients='[{% for ing in row.recipe_dinner.ingredients.all %}{"name": "{{ ing.ingredient.name|escapejs }}", "amount": "{{ ing.amount }}", "unit": "{{ ing.unit|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}]'
+                                data-recipe-instructions="{{ row.recipe_dinner.instructions|escape }}">
                                 {{ row.recipe_dinner.name }}
                             </button>
                             {% else %}
@@ -138,7 +152,8 @@
                                 data-preparation-time="{{ row.recipe_supper.preparation_time }}"
                                 data-servings="{{ row.recipe_supper.servings }}"
                                 data-category="{{ row.recipe_supper.category|default:'Brak kategorii'|escape }}"
-                                data-recipe-ingredients="{% for ingredient in row.recipe_supper.ingredients.all %}{{ ingredient.ingredient.name }}{% if not forloop.last %}, {% endif %}{% empty %}Brak danych{% endfor %}">
+                                data-recipe-ingredients='[{% for ing in row.recipe_supper.ingredients.all %}{"name": "{{ ing.ingredient.name|escapejs }}", "amount": "{{ ing.amount }}", "unit": "{{ ing.unit|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}]'
+                                data-recipe-instructions="{{ row.recipe_supper.instructions|escape }}">
                                 {{ row.recipe_supper.name }}
                             </button>
                             {% else %}
@@ -153,9 +168,21 @@
                                 data-preparation-time="{{ row.recipe_dinner_alternative.preparation_time }}"
                                 data-servings="{{ row.recipe_dinner_alternative.servings }}"
                                 data-category="{{ row.recipe_dinner_alternative.category|default:'Brak kategorii'|escape }}"
-                                data-recipe-ingredients="{% for ingredient in row.recipe_dinner_alternative.ingredients.all %}{{ ingredient.ingredient.name }}{% if not forloop.last %}, {% endif %}{% empty %}Brak danych{% endfor %}">
+                                data-recipe-ingredients='[{% for ing in row.recipe_dinner_alternative.ingredients.all %}{"name": "{{ ing.ingredient.name|escapejs }}", "amount": "{{ ing.amount }}", "unit": "{{ ing.unit|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}]'
+                                data-recipe-instructions="{{ row.recipe_dinner_alternative.instructions|escape }}">
                                 {{ row.recipe_dinner_alternative.name }}
                             </button>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center small">
+                            {% if row.calories_main > 0 or row.calories_alt > 0 %}
+                            <span title="Obiad + Kolacja">{{ row.calories_main|floatformat:0 }}</span>
+                            {% if row.calories_alt > 0 and row.calories_alt != row.calories_main %}
+                            <span class="text-muted"> | </span>
+                            <span class="text-secondary" title="Alternatywa + Kolacja">{{ row.calories_alt|floatformat:0 }}</span>
+                            {% endif %}
                             {% else %}
                             <span class="text-muted">—</span>
                             {% endif %}
@@ -199,12 +226,11 @@
                 modalBody.appendChild(description);
 
                 const metaList = document.createElement('ul');
-                metaList.className = 'list-unstyled small text-muted mb-0';
+                metaList.className = 'list-unstyled small text-muted mb-3';
                 const metaItems = [
                     ['Czas przygotowania', button.dataset.preparationTime + ' min'],
                     ['Porcje', button.dataset.servings],
-                    ['Kategoria', button.dataset.category],
-                    ['Składniki', button.dataset.recipeIngredients || 'Brak danych']
+                    ['Kategoria', button.dataset.category]
                 ];
 
                 metaItems.forEach(function ([label, value]) {
@@ -214,6 +240,59 @@
                     metaList.appendChild(item);
                 });
                 modalBody.appendChild(metaList);
+
+                // Składniki jako lista
+                const ingredientsHeader = document.createElement('h6');
+                ingredientsHeader.className = 'fw-bold mt-3 mb-2';
+                ingredientsHeader.textContent = 'Składniki';
+                modalBody.appendChild(ingredientsHeader);
+
+                try {
+                    const ingredientsData = JSON.parse(button.dataset.recipeIngredients || '[]');
+                    if (ingredientsData.length > 0) {
+                        const ingredientsList = document.createElement('ul');
+                        ingredientsList.className = 'small ps-3 mb-0';
+                        ingredientsData.forEach(function(ing) {
+                            const li = document.createElement('li');
+                            li.className = 'mb-1';
+                            const amount = parseFloat(ing.amount);
+                            const formattedAmount = Number.isInteger(amount) ? amount.toString() : amount.toFixed(2).replace(/\.?0+$/, '');
+                            li.textContent = formattedAmount + ' ' + ing.unit + ' ' + ing.name;
+                            ingredientsList.appendChild(li);
+                        });
+                        modalBody.appendChild(ingredientsList);
+                    } else {
+                        const noIngredients = document.createElement('p');
+                        noIngredients.className = 'small text-muted';
+                        noIngredients.textContent = 'Brak składników';
+                        modalBody.appendChild(noIngredients);
+                    }
+                } catch (e) {
+                    const errorMsg = document.createElement('p');
+                    errorMsg.className = 'small text-muted';
+                    errorMsg.textContent = 'Brak danych o składnikach';
+                    modalBody.appendChild(errorMsg);
+                }
+
+                // Kroki przygotowania
+                const instructions = button.dataset.recipeInstructions;
+                if (instructions && instructions.trim()) {
+                    const instructionsHeader = document.createElement('h6');
+                    instructionsHeader.className = 'fw-bold mt-3 mb-2';
+                    instructionsHeader.textContent = 'Kroki przygotowania';
+                    modalBody.appendChild(instructionsHeader);
+
+                    const instructionsList = document.createElement('ol');
+                    instructionsList.className = 'small ps-3 mb-0';
+                    const steps = instructions.split('\n').filter(step => step.trim());
+                    steps.forEach(function(step) {
+                        const li = document.createElement('li');
+                        li.className = 'mb-1';
+                        li.textContent = step.trim();
+                        instructionsList.appendChild(li);
+                    });
+                    modalBody.appendChild(instructionsList);
+                }
 
                 const modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
                 modalInstance.show();

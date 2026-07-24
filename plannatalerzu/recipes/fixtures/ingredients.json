@@ -1,0 +1,388 @@
+[
+  {"model": "recipes.ingredient", "pk": 101, "fields": {"name": "Kurczak (pierś)", "category": "mięso", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 101, "fields": {"ingredient": 101, "calories": 165, "protein": 31, "carbohydrates": 0, "fat": 3.6, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 102, "fields": {"name": "Kurczak (udko)", "category": "mięso", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 102, "fields": {"ingredient": 102, "calories": 209, "protein": 26, "carbohydrates": 0, "fat": 11, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 103, "fields": {"name": "Wołowina (antrykot)", "category": "mięso", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 103, "fields": {"ingredient": 103, "calories": 250, "protein": 26, "carbohydrates": 0, "fat": 16, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 104, "fields": {"name": "Wołowina mielona", "category": "mięso", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 104, "fields": {"ingredient": 104, "calories": 254, "protein": 17, "carbohydrates": 0, "fat": 20, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 105, "fields": {"name": "Wieprzowina (schab)", "category": "mięso", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 105, "fields": {"ingredient": 105, "calories": 242, "protein": 27, "carbohydrates": 0, "fat": 14, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 106, "fields": {"name": "Wieprzowina (karkówka)", "category": "mięso", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 106, "fields": {"ingredient": 106, "calories": 290, "protein": 24, "carbohydrates": 0, "fat": 21, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 107, "fields": {"name": "Boczek", "category": "mięso", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 107, "fields": {"ingredient": 107, "calories": 541, "protein": 37, "carbohydrates": 1.4, "fat": 42, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 108, "fields": {"name": "Szynka", "category": "mięso", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 108, "fields": {"ingredient": 108, "calories": 145, "protein": 21, "carbohydrates": 1.5, "fat": 6, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 109, "fields": {"name": "Indyk (pierś)", "category": "mięso", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 109, "fields": {"ingredient": 109, "calories": 135, "protein": 30, "carbohydrates": 0, "fat": 1, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 110, "fields": {"name": "Kiełbasa", "category": "mięso", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 110, "fields": {"ingredient": 110, "calories": 301, "protein": 12, "carbohydrates": 2, "fat": 27, "fiber": 0}},
+
+  {"model": "recipes.ingredient", "pk": 201, "fields": {"name": "Łosoś", "category": "ryby", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 201, "fields": {"ingredient": 201, "calories": 208, "protein": 20, "carbohydrates": 0, "fat": 13, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 202, "fields": {"name": "Dorsz", "category": "ryby", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 202, "fields": {"ingredient": 202, "calories": 82, "protein": 18, "carbohydrates": 0, "fat": 0.7, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 203, "fields": {"name": "Tuńczyk", "category": "ryby", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 203, "fields": {"ingredient": 203, "calories": 144, "protein": 23, "carbohydrates": 0, "fat": 5, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 204, "fields": {"name": "Pstrąg", "category": "ryby", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 204, "fields": {"ingredient": 204, "calories": 141, "protein": 20, "carbohydrates": 0, "fat": 6, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 205, "fields": {"name": "Makrela", "category": "ryby", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 205, "fields": {"ingredient": 205, "calories": 262, "protein": 19, "carbohydrates": 0, "fat": 20, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 206, "fields": {"name": "Krewetki", "category": "ryby", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 206, "fields": {"ingredient": 206, "calories": 99, "protein": 24, "carbohydrates": 0.2, "fat": 0.3, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 207, "fields": {"name": "Śledź", "category": "ryby", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 207, "fields": {"ingredient": 207, "calories": 158, "protein": 18, "carbohydrates": 0, "fat": 9, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 208, "fields": {"name": "Tilapia", "category": "ryby", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 208, "fields": {"ingredient": 208, "calories": 96, "protein": 20, "carbohydrates": 0, "fat": 1.7, "fiber": 0}},
+
+  {"model": "recipes.ingredient", "pk": 301, "fields": {"name": "Ziemniak", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 301, "fields": {"ingredient": 301, "calories": 77, "protein": 2, "carbohydrates": 17, "fat": 0.1, "fiber": 2.2}},
+  
+  {"model": "recipes.ingredient", "pk": 302, "fields": {"name": "Marchew", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 302, "fields": {"ingredient": 302, "calories": 41, "protein": 0.9, "carbohydrates": 10, "fat": 0.2, "fiber": 2.8}},
+  
+  {"model": "recipes.ingredient", "pk": 303, "fields": {"name": "Cebula", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 303, "fields": {"ingredient": 303, "calories": 40, "protein": 1.1, "carbohydrates": 9, "fat": 0.1, "fiber": 1.7}},
+  
+  {"model": "recipes.ingredient", "pk": 304, "fields": {"name": "Czosnek", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 304, "fields": {"ingredient": 304, "calories": 149, "protein": 6.4, "carbohydrates": 33, "fat": 0.5, "fiber": 2.1}},
+  
+  {"model": "recipes.ingredient", "pk": 305, "fields": {"name": "Pomidor", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 305, "fields": {"ingredient": 305, "calories": 18, "protein": 0.9, "carbohydrates": 3.9, "fat": 0.2, "fiber": 1.2}},
+  
+  {"model": "recipes.ingredient", "pk": 306, "fields": {"name": "Ogórek", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 306, "fields": {"ingredient": 306, "calories": 15, "protein": 0.7, "carbohydrates": 3.6, "fat": 0.1, "fiber": 0.5}},
+  
+  {"model": "recipes.ingredient", "pk": 307, "fields": {"name": "Papryka", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 307, "fields": {"ingredient": 307, "calories": 31, "protein": 1, "carbohydrates": 6, "fat": 0.3, "fiber": 2.1}},
+  
+  {"model": "recipes.ingredient", "pk": 308, "fields": {"name": "Brokuł", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 308, "fields": {"ingredient": 308, "calories": 34, "protein": 2.8, "carbohydrates": 7, "fat": 0.4, "fiber": 2.6}},
+  
+  {"model": "recipes.ingredient", "pk": 309, "fields": {"name": "Kalafior", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 309, "fields": {"ingredient": 309, "calories": 25, "protein": 1.9, "carbohydrates": 5, "fat": 0.3, "fiber": 2}},
+  
+  {"model": "recipes.ingredient", "pk": 310, "fields": {"name": "Szpinak", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 310, "fields": {"ingredient": 310, "calories": 23, "protein": 2.9, "carbohydrates": 3.6, "fat": 0.4, "fiber": 2.2}},
+  
+  {"model": "recipes.ingredient", "pk": 311, "fields": {"name": "Sałata", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 311, "fields": {"ingredient": 311, "calories": 15, "protein": 1.4, "carbohydrates": 2.9, "fat": 0.2, "fiber": 1.3}},
+  
+  {"model": "recipes.ingredient", "pk": 312, "fields": {"name": "Cukinia", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 312, "fields": {"ingredient": 312, "calories": 17, "protein": 1.2, "carbohydrates": 3.1, "fat": 0.3, "fiber": 1}},
+  
+  {"model": "recipes.ingredient", "pk": 313, "fields": {"name": "Bakłażan", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 313, "fields": {"ingredient": 313, "calories": 25, "protein": 1, "carbohydrates": 6, "fat": 0.2, "fiber": 3}},
+  
+  {"model": "recipes.ingredient", "pk": 314, "fields": {"name": "Pieczarki", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 314, "fields": {"ingredient": 314, "calories": 22, "protein": 3.1, "carbohydrates": 3.3, "fat": 0.3, "fiber": 1}},
+  
+  {"model": "recipes.ingredient", "pk": 315, "fields": {"name": "Kapusta biała", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 315, "fields": {"ingredient": 315, "calories": 25, "protein": 1.3, "carbohydrates": 6, "fat": 0.1, "fiber": 2.5}},
+  
+  {"model": "recipes.ingredient", "pk": 316, "fields": {"name": "Por", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 316, "fields": {"ingredient": 316, "calories": 61, "protein": 1.5, "carbohydrates": 14, "fat": 0.3, "fiber": 1.8}},
+  
+  {"model": "recipes.ingredient", "pk": 317, "fields": {"name": "Seler naciowy", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 317, "fields": {"ingredient": 317, "calories": 16, "protein": 0.7, "carbohydrates": 3, "fat": 0.2, "fiber": 1.6}},
+  
+  {"model": "recipes.ingredient", "pk": 318, "fields": {"name": "Dynia", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 318, "fields": {"ingredient": 318, "calories": 26, "protein": 1, "carbohydrates": 6.5, "fat": 0.1, "fiber": 0.5}},
+  
+  {"model": "recipes.ingredient", "pk": 319, "fields": {"name": "Fasola szparagowa", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 319, "fields": {"ingredient": 319, "calories": 31, "protein": 1.8, "carbohydrates": 7, "fat": 0.1, "fiber": 3.4}},
+  
+  {"model": "recipes.ingredient", "pk": 320, "fields": {"name": "Groszek zielony", "category": "warzywa", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 320, "fields": {"ingredient": 320, "calories": 81, "protein": 5.4, "carbohydrates": 14, "fat": 0.4, "fiber": 5.7}},
+
+  {"model": "recipes.ingredient", "pk": 401, "fields": {"name": "Jabłko", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 401, "fields": {"ingredient": 401, "calories": 52, "protein": 0.3, "carbohydrates": 14, "fat": 0.2, "fiber": 2.4}},
+  
+  {"model": "recipes.ingredient", "pk": 402, "fields": {"name": "Banan", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 402, "fields": {"ingredient": 402, "calories": 89, "protein": 1.1, "carbohydrates": 23, "fat": 0.3, "fiber": 2.6}},
+  
+  {"model": "recipes.ingredient", "pk": 403, "fields": {"name": "Pomarańcza", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 403, "fields": {"ingredient": 403, "calories": 47, "protein": 0.9, "carbohydrates": 12, "fat": 0.1, "fiber": 2.4}},
+  
+  {"model": "recipes.ingredient", "pk": 404, "fields": {"name": "Cytryna", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 404, "fields": {"ingredient": 404, "calories": 29, "protein": 1.1, "carbohydrates": 9, "fat": 0.3, "fiber": 2.8}},
+  
+  {"model": "recipes.ingredient", "pk": 405, "fields": {"name": "Truskawka", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 405, "fields": {"ingredient": 405, "calories": 32, "protein": 0.7, "carbohydrates": 8, "fat": 0.3, "fiber": 2}},
+  
+  {"model": "recipes.ingredient", "pk": 406, "fields": {"name": "Malina", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 406, "fields": {"ingredient": 406, "calories": 52, "protein": 1.2, "carbohydrates": 12, "fat": 0.7, "fiber": 6.5}},
+  
+  {"model": "recipes.ingredient", "pk": 407, "fields": {"name": "Borówka", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 407, "fields": {"ingredient": 407, "calories": 57, "protein": 0.7, "carbohydrates": 14, "fat": 0.3, "fiber": 2.4}},
+  
+  {"model": "recipes.ingredient", "pk": 408, "fields": {"name": "Winogrono", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 408, "fields": {"ingredient": 408, "calories": 69, "protein": 0.7, "carbohydrates": 18, "fat": 0.2, "fiber": 0.9}},
+  
+  {"model": "recipes.ingredient", "pk": 409, "fields": {"name": "Gruszka", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 409, "fields": {"ingredient": 409, "calories": 57, "protein": 0.4, "carbohydrates": 15, "fat": 0.1, "fiber": 3.1}},
+  
+  {"model": "recipes.ingredient", "pk": 410, "fields": {"name": "Brzoskwinia", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 410, "fields": {"ingredient": 410, "calories": 39, "protein": 0.9, "carbohydrates": 10, "fat": 0.3, "fiber": 1.5}},
+  
+  {"model": "recipes.ingredient", "pk": 411, "fields": {"name": "Awokado", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 411, "fields": {"ingredient": 411, "calories": 160, "protein": 2, "carbohydrates": 9, "fat": 15, "fiber": 7}},
+  
+  {"model": "recipes.ingredient", "pk": 412, "fields": {"name": "Ananas", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 412, "fields": {"ingredient": 412, "calories": 50, "protein": 0.5, "carbohydrates": 13, "fat": 0.1, "fiber": 1.4}},
+  
+  {"model": "recipes.ingredient", "pk": 413, "fields": {"name": "Mango", "category": "owoce", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 413, "fields": {"ingredient": 413, "calories": 60, "protein": 0.8, "carbohydrates": 15, "fat": 0.4, "fiber": 1.6}},
+
+  {"model": "recipes.ingredient", "pk": 501, "fields": {"name": "Sól", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 501, "fields": {"ingredient": 501, "calories": 0, "protein": 0, "carbohydrates": 0, "fat": 0, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 502, "fields": {"name": "Pieprz czarny", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 502, "fields": {"ingredient": 502, "calories": 251, "protein": 10, "carbohydrates": 64, "fat": 3.3, "fiber": 25}},
+  
+  {"model": "recipes.ingredient", "pk": 503, "fields": {"name": "Papryka słodka", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 503, "fields": {"ingredient": 503, "calories": 282, "protein": 14, "carbohydrates": 54, "fat": 13, "fiber": 35}},
+  
+  {"model": "recipes.ingredient", "pk": 504, "fields": {"name": "Kurkuma", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 504, "fields": {"ingredient": 504, "calories": 312, "protein": 10, "carbohydrates": 67, "fat": 3.2, "fiber": 22}},
+  
+  {"model": "recipes.ingredient", "pk": 505, "fields": {"name": "Oregano", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 505, "fields": {"ingredient": 505, "calories": 265, "protein": 9, "carbohydrates": 69, "fat": 4.3, "fiber": 43}},
+  
+  {"model": "recipes.ingredient", "pk": 506, "fields": {"name": "Bazylia", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 506, "fields": {"ingredient": 506, "calories": 23, "protein": 3.2, "carbohydrates": 2.7, "fat": 0.6, "fiber": 1.6}},
+  
+  {"model": "recipes.ingredient", "pk": 507, "fields": {"name": "Tymianek", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 507, "fields": {"ingredient": 507, "calories": 101, "protein": 5.6, "carbohydrates": 24, "fat": 1.7, "fiber": 14}},
+  
+  {"model": "recipes.ingredient", "pk": 508, "fields": {"name": "Rozmaryn", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 508, "fields": {"ingredient": 508, "calories": 131, "protein": 3.3, "carbohydrates": 21, "fat": 5.9, "fiber": 14}},
+  
+  {"model": "recipes.ingredient", "pk": 509, "fields": {"name": "Cynamon", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 509, "fields": {"ingredient": 509, "calories": 247, "protein": 4, "carbohydrates": 81, "fat": 1.2, "fiber": 53}},
+  
+  {"model": "recipes.ingredient", "pk": 510, "fields": {"name": "Imbir", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 510, "fields": {"ingredient": 510, "calories": 80, "protein": 1.8, "carbohydrates": 18, "fat": 0.8, "fiber": 2}},
+  
+  {"model": "recipes.ingredient", "pk": 511, "fields": {"name": "Koperek", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 511, "fields": {"ingredient": 511, "calories": 43, "protein": 3.5, "carbohydrates": 7, "fat": 1.1, "fiber": 2.1}},
+  
+  {"model": "recipes.ingredient", "pk": 512, "fields": {"name": "Pietruszka (natka)", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 512, "fields": {"ingredient": 512, "calories": 36, "protein": 3, "carbohydrates": 6, "fat": 0.8, "fiber": 3.3}},
+  
+  {"model": "recipes.ingredient", "pk": 513, "fields": {"name": "Majeranek", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 513, "fields": {"ingredient": 513, "calories": 271, "protein": 12, "carbohydrates": 60, "fat": 7, "fiber": 40}},
+  
+  {"model": "recipes.ingredient", "pk": 514, "fields": {"name": "Ziele angielskie", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 514, "fields": {"ingredient": 514, "calories": 263, "protein": 6, "carbohydrates": 72, "fat": 8.7, "fiber": 22}},
+  
+  {"model": "recipes.ingredient", "pk": 515, "fields": {"name": "Liść laurowy", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 515, "fields": {"ingredient": 515, "calories": 313, "protein": 7.6, "carbohydrates": 75, "fat": 8.4, "fiber": 26}},
+  
+  {"model": "recipes.ingredient", "pk": 516, "fields": {"name": "Kminek", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 516, "fields": {"ingredient": 516, "calories": 375, "protein": 18, "carbohydrates": 44, "fat": 22, "fiber": 11}},
+  
+  {"model": "recipes.ingredient", "pk": 517, "fields": {"name": "Chili", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 517, "fields": {"ingredient": 517, "calories": 40, "protein": 1.9, "carbohydrates": 9, "fat": 0.4, "fiber": 1.5}},
+  
+  {"model": "recipes.ingredient", "pk": 518, "fields": {"name": "Curry", "category": "przyprawy", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 518, "fields": {"ingredient": 518, "calories": 325, "protein": 14, "carbohydrates": 58, "fat": 14, "fiber": 33}},
+
+  {"model": "recipes.ingredient", "pk": 601, "fields": {"name": "Mleko 2%", "category": "nabiał", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 601, "fields": {"ingredient": 601, "calories": 50, "protein": 3.4, "carbohydrates": 5, "fat": 2, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 602, "fields": {"name": "Mleko 3.2%", "category": "nabiał", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 602, "fields": {"ingredient": 602, "calories": 64, "protein": 3.2, "carbohydrates": 4.8, "fat": 3.2, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 603, "fields": {"name": "Śmietana 18%", "category": "nabiał", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 603, "fields": {"ingredient": 603, "calories": 182, "protein": 2.5, "carbohydrates": 3.5, "fat": 18, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 604, "fields": {"name": "Śmietana 30%", "category": "nabiał", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 604, "fields": {"ingredient": 604, "calories": 292, "protein": 2.2, "carbohydrates": 2.8, "fat": 30, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 605, "fields": {"name": "Jogurt naturalny", "category": "nabiał", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 605, "fields": {"ingredient": 605, "calories": 61, "protein": 3.5, "carbohydrates": 4.7, "fat": 3.3, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 606, "fields": {"name": "Jogurt grecki", "category": "nabiał", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 606, "fields": {"ingredient": 606, "calories": 97, "protein": 9, "carbohydrates": 3.6, "fat": 5, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 607, "fields": {"name": "Ser żółty", "category": "nabiał", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 607, "fields": {"ingredient": 607, "calories": 402, "protein": 25, "carbohydrates": 1.3, "fat": 33, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 608, "fields": {"name": "Ser biały twarogowy", "category": "nabiał", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 608, "fields": {"ingredient": 608, "calories": 98, "protein": 11, "carbohydrates": 3.4, "fat": 4.3, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 609, "fields": {"name": "Mozzarella", "category": "nabiał", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 609, "fields": {"ingredient": 609, "calories": 280, "protein": 28, "carbohydrates": 3.1, "fat": 17, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 610, "fields": {"name": "Parmezan", "category": "nabiał", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 610, "fields": {"ingredient": 610, "calories": 431, "protein": 38, "carbohydrates": 4.1, "fat": 29, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 611, "fields": {"name": "Feta", "category": "nabiał", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 611, "fields": {"ingredient": 611, "calories": 264, "protein": 14, "carbohydrates": 4.1, "fat": 21, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 612, "fields": {"name": "Masło", "category": "nabiał", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 612, "fields": {"ingredient": 612, "calories": 717, "protein": 0.9, "carbohydrates": 0.1, "fat": 81, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 613, "fields": {"name": "Kefir", "category": "nabiał", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 613, "fields": {"ingredient": 613, "calories": 41, "protein": 3.4, "carbohydrates": 4.7, "fat": 1, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 614, "fields": {"name": "Ricotta", "category": "nabiał", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 614, "fields": {"ingredient": 614, "calories": 174, "protein": 11, "carbohydrates": 3, "fat": 13, "fiber": 0}},
+
+  {"model": "recipes.ingredient", "pk": 701, "fields": {"name": "Chleb pszenny", "category": "pieczywo", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 701, "fields": {"ingredient": 701, "calories": 265, "protein": 9, "carbohydrates": 49, "fat": 3.2, "fiber": 2.7}},
+  
+  {"model": "recipes.ingredient", "pk": 702, "fields": {"name": "Chleb żytni", "category": "pieczywo", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 702, "fields": {"ingredient": 702, "calories": 259, "protein": 8.5, "carbohydrates": 48, "fat": 3.3, "fiber": 5.8}},
+  
+  {"model": "recipes.ingredient", "pk": 703, "fields": {"name": "Chleb pełnoziarnisty", "category": "pieczywo", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 703, "fields": {"ingredient": 703, "calories": 247, "protein": 13, "carbohydrates": 41, "fat": 4.2, "fiber": 7}},
+  
+  {"model": "recipes.ingredient", "pk": 704, "fields": {"name": "Bułka pszenna", "category": "pieczywo", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 704, "fields": {"ingredient": 704, "calories": 289, "protein": 9, "carbohydrates": 54, "fat": 3.5, "fiber": 2.3}},
+  
+  {"model": "recipes.ingredient", "pk": 705, "fields": {"name": "Bagietka", "category": "pieczywo", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 705, "fields": {"ingredient": 705, "calories": 274, "protein": 9, "carbohydrates": 51, "fat": 3, "fiber": 2.4}},
+  
+  {"model": "recipes.ingredient", "pk": 706, "fields": {"name": "Tortilla pszenna", "category": "pieczywo", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 706, "fields": {"ingredient": 706, "calories": 312, "protein": 8.5, "carbohydrates": 52, "fat": 8, "fiber": 3.5}},
+  
+  {"model": "recipes.ingredient", "pk": 707, "fields": {"name": "Bułka tarta", "category": "pieczywo", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 707, "fields": {"ingredient": 707, "calories": 395, "protein": 13, "carbohydrates": 72, "fat": 5.3, "fiber": 4.5}},
+
+  {"model": "recipes.ingredient", "pk": 801, "fields": {"name": "Jajko kurze", "category": "jaja", "default_unit": "szt"}},
+  {"model": "recipes.nutritioninfo", "pk": 801, "fields": {"ingredient": 801, "calories": 155, "protein": 13, "carbohydrates": 1.1, "fat": 11, "fiber": 0}},
+
+  {"model": "recipes.ingredient", "pk": 901, "fields": {"name": "Oliwa z oliwek", "category": "tłuszcze", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 901, "fields": {"ingredient": 901, "calories": 884, "protein": 0, "carbohydrates": 0, "fat": 100, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 902, "fields": {"name": "Olej rzepakowy", "category": "tłuszcze", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 902, "fields": {"ingredient": 902, "calories": 884, "protein": 0, "carbohydrates": 0, "fat": 100, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 903, "fields": {"name": "Olej słonecznikowy", "category": "tłuszcze", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 903, "fields": {"ingredient": 903, "calories": 884, "protein": 0, "carbohydrates": 0, "fat": 100, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 904, "fields": {"name": "Olej kokosowy", "category": "tłuszcze", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 904, "fields": {"ingredient": 904, "calories": 862, "protein": 0, "carbohydrates": 0, "fat": 100, "fiber": 0}},
+
+  {"model": "recipes.ingredient", "pk": 1001, "fields": {"name": "Ryż biały", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1001, "fields": {"ingredient": 1001, "calories": 365, "protein": 7, "carbohydrates": 80, "fat": 0.7, "fiber": 1.3}},
+  
+  {"model": "recipes.ingredient", "pk": 1002, "fields": {"name": "Ryż brązowy", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1002, "fields": {"ingredient": 1002, "calories": 370, "protein": 8, "carbohydrates": 77, "fat": 2.7, "fiber": 3.5}},
+  
+  {"model": "recipes.ingredient", "pk": 1003, "fields": {"name": "Makaron pszenny", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1003, "fields": {"ingredient": 1003, "calories": 371, "protein": 13, "carbohydrates": 75, "fat": 1.5, "fiber": 3.2}},
+  
+  {"model": "recipes.ingredient", "pk": 1004, "fields": {"name": "Makaron pełnoziarnisty", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1004, "fields": {"ingredient": 1004, "calories": 348, "protein": 15, "carbohydrates": 68, "fat": 2.5, "fiber": 7}},
+  
+  {"model": "recipes.ingredient", "pk": 1005, "fields": {"name": "Kasza gryczana", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1005, "fields": {"ingredient": 1005, "calories": 343, "protein": 13, "carbohydrates": 72, "fat": 3.4, "fiber": 10}},
+  
+  {"model": "recipes.ingredient", "pk": 1006, "fields": {"name": "Kasza jaglana", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1006, "fields": {"ingredient": 1006, "calories": 378, "protein": 11, "carbohydrates": 73, "fat": 4.2, "fiber": 8.5}},
+  
+  {"model": "recipes.ingredient", "pk": 1007, "fields": {"name": "Kasza jęczmienna", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1007, "fields": {"ingredient": 1007, "calories": 354, "protein": 12, "carbohydrates": 73, "fat": 2.3, "fiber": 17}},
+  
+  {"model": "recipes.ingredient", "pk": 1008, "fields": {"name": "Kuskus", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1008, "fields": {"ingredient": 1008, "calories": 376, "protein": 13, "carbohydrates": 77, "fat": 0.6, "fiber": 5}},
+  
+  {"model": "recipes.ingredient", "pk": 1009, "fields": {"name": "Płatki owsiane", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1009, "fields": {"ingredient": 1009, "calories": 389, "protein": 17, "carbohydrates": 66, "fat": 7, "fiber": 11}},
+  
+  {"model": "recipes.ingredient", "pk": 1010, "fields": {"name": "Mąka pszenna", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1010, "fields": {"ingredient": 1010, "calories": 364, "protein": 10, "carbohydrates": 76, "fat": 1, "fiber": 2.7}},
+  
+  {"model": "recipes.ingredient", "pk": 1011, "fields": {"name": "Mąka pełnoziarnista", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1011, "fields": {"ingredient": 1011, "calories": 340, "protein": 13, "carbohydrates": 72, "fat": 2.5, "fiber": 11}},
+  
+  {"model": "recipes.ingredient", "pk": 1012, "fields": {"name": "Quinoa", "category": "produkty zbożowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1012, "fields": {"ingredient": 1012, "calories": 368, "protein": 14, "carbohydrates": 64, "fat": 6, "fiber": 7}},
+
+  {"model": "recipes.ingredient", "pk": 1101, "fields": {"name": "Ciecierzyca", "category": "strączkowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1101, "fields": {"ingredient": 1101, "calories": 364, "protein": 19, "carbohydrates": 61, "fat": 6, "fiber": 17}},
+  
+  {"model": "recipes.ingredient", "pk": 1102, "fields": {"name": "Soczewica czerwona", "category": "strączkowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1102, "fields": {"ingredient": 1102, "calories": 352, "protein": 25, "carbohydrates": 63, "fat": 1.1, "fiber": 11}},
+  
+  {"model": "recipes.ingredient", "pk": 1103, "fields": {"name": "Fasola biała", "category": "strączkowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1103, "fields": {"ingredient": 1103, "calories": 333, "protein": 23, "carbohydrates": 60, "fat": 0.9, "fiber": 25}},
+  
+  {"model": "recipes.ingredient", "pk": 1104, "fields": {"name": "Fasola czerwona", "category": "strączkowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1104, "fields": {"ingredient": 1104, "calories": 337, "protein": 24, "carbohydrates": 60, "fat": 1.1, "fiber": 25}},
+  
+  {"model": "recipes.ingredient", "pk": 1105, "fields": {"name": "Tofu", "category": "strączkowe", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1105, "fields": {"ingredient": 1105, "calories": 144, "protein": 17, "carbohydrates": 3, "fat": 8, "fiber": 2}},
+
+  {"model": "recipes.ingredient", "pk": 1201, "fields": {"name": "Cukier biały", "category": "dodatki", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1201, "fields": {"ingredient": 1201, "calories": 387, "protein": 0, "carbohydrates": 100, "fat": 0, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 1202, "fields": {"name": "Miód", "category": "dodatki", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1202, "fields": {"ingredient": 1202, "calories": 304, "protein": 0.3, "carbohydrates": 82, "fat": 0, "fiber": 0.2}},
+  
+  {"model": "recipes.ingredient", "pk": 1203, "fields": {"name": "Sos sojowy", "category": "dodatki", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 1203, "fields": {"ingredient": 1203, "calories": 53, "protein": 8, "carbohydrates": 5, "fat": 0, "fiber": 0.8}},
+  
+  {"model": "recipes.ingredient", "pk": 1204, "fields": {"name": "Ocet balsamiczny", "category": "dodatki", "default_unit": "ml"}},
+  {"model": "recipes.nutritioninfo", "pk": 1204, "fields": {"ingredient": 1204, "calories": 88, "protein": 0.5, "carbohydrates": 17, "fat": 0, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 1205, "fields": {"name": "Ketchup", "category": "dodatki", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1205, "fields": {"ingredient": 1205, "calories": 112, "protein": 1.8, "carbohydrates": 26, "fat": 0.5, "fiber": 0.3}},
+  
+  {"model": "recipes.ingredient", "pk": 1206, "fields": {"name": "Musztarda", "category": "dodatki", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1206, "fields": {"ingredient": 1206, "calories": 66, "protein": 4, "carbohydrates": 6, "fat": 3, "fiber": 3}},
+  
+  {"model": "recipes.ingredient", "pk": 1207, "fields": {"name": "Majonez", "category": "dodatki", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1207, "fields": {"ingredient": 1207, "calories": 680, "protein": 1, "carbohydrates": 0.6, "fat": 75, "fiber": 0}},
+  
+  {"model": "recipes.ingredient", "pk": 1208, "fields": {"name": "Passata pomidorowa", "category": "dodatki", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1208, "fields": {"ingredient": 1208, "calories": 24, "protein": 1.3, "carbohydrates": 4.2, "fat": 0.2, "fiber": 1.2}},
+  
+  {"model": "recipes.ingredient", "pk": 1209, "fields": {"name": "Koncentrat pomidorowy", "category": "dodatki", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1209, "fields": {"ingredient": 1209, "calories": 82, "protein": 4.3, "carbohydrates": 19, "fat": 0.5, "fiber": 4.1}},
+  
+  {"model": "recipes.ingredient", "pk": 1210, "fields": {"name": "Bulion warzywny (kostka)", "category": "dodatki", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1210, "fields": {"ingredient": 1210, "calories": 235, "protein": 10, "carbohydrates": 16, "fat": 14, "fiber": 0.3}},
+
+  {"model": "recipes.ingredient", "pk": 1301, "fields": {"name": "Migdały", "category": "orzechy i nasiona", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1301, "fields": {"ingredient": 1301, "calories": 579, "protein": 21, "carbohydrates": 22, "fat": 50, "fiber": 13}},
+  
+  {"model": "recipes.ingredient", "pk": 1302, "fields": {"name": "Orzechy włoskie", "category": "orzechy i nasiona", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1302, "fields": {"ingredient": 1302, "calories": 654, "protein": 15, "carbohydrates": 14, "fat": 65, "fiber": 6.7}},
+  
+  {"model": "recipes.ingredient", "pk": 1303, "fields": {"name": "Orzechy laskowe", "category": "orzechy i nasiona", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1303, "fields": {"ingredient": 1303, "calories": 628, "protein": 15, "carbohydrates": 17, "fat": 61, "fiber": 9.7}},
+  
+  {"model": "recipes.ingredient", "pk": 1304, "fields": {"name": "Pestki dyni", "category": "orzechy i nasiona", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1304, "fields": {"ingredient": 1304, "calories": 559, "protein": 30, "carbohydrates": 11, "fat": 49, "fiber": 6}},
+  
+  {"model": "recipes.ingredient", "pk": 1305, "fields": {"name": "Słonecznik (pestki)", "category": "orzechy i nasiona", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1305, "fields": {"ingredient": 1305, "calories": 584, "protein": 21, "carbohydrates": 20, "fat": 51, "fiber": 8.6}},
+  
+  {"model": "recipes.ingredient", "pk": 1306, "fields": {"name": "Siemię lniane", "category": "orzechy i nasiona", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1306, "fields": {"ingredient": 1306, "calories": 534, "protein": 18, "carbohydrates": 29, "fat": 42, "fiber": 27}},
+  
+  {"model": "recipes.ingredient", "pk": 1307, "fields": {"name": "Sezam", "category": "orzechy i nasiona", "default_unit": "g"}},
+  {"model": "recipes.nutritioninfo", "pk": 1307, "fields": {"ingredient": 1307, "calories": 573, "protein": 18, "carbohydrates": 23, "fat": 50, "fiber": 12}}
+]

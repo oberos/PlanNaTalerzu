@@ -43,3 +43,15 @@ Jeśli chcesz zalogować się do panelu administracyjnego Django:
 ```bash
 python manage.py createsuperuser
 ```
+
+### 6. Wczytanie składników z wartościami odżywczymi
+
+Projekt zawiera gotowy zestaw 111 popularnych składników (mięso, ryby, warzywa, owoce, nabiał, przyprawy, pieczywo i więcej) wraz z wartościami odżywczymi na 100g/100ml.
+
+Aby załadować je do bazy danych:
+
+```bash
+python manage.py loaddata ingredients
+```
+
+Fixture znajduje się w `recipes/fixtures/ingredients.json`.

@@ -27,6 +27,10 @@
                             href="{% url 'recipes:index' %}">Przepisy</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/recipes/ingredients/' %}active{% endif %}"
+                            href="{% url 'recipes:ingredients' %}">Składniki</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.path == '/shopping/' %}active{% endif %}"
                             href="{% url 'shopping:index' %}">Lista zakupów</a>
                     </li>
