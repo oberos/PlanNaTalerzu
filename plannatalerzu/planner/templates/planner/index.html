@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Planowanie{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h2 fw-bold mb-1">Planowanie posiłków</h1>
+                <p class="text-muted mb-0">Twórz i zarządzaj planami na cały tydzień.</p>
+            </div>
+        </div>
+
+        <form method="post" class="row gy-2 gx-3 align-items-end">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create">
+            <div class="col-md-5">
+                <label for="planner-name" class="form-label">Nazwa nowego planu</label>
+                <input id="planner-name" name="name" type="text" class="form-control" placeholder="Podaj nazwę planu"
+                    required>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary mt-4">Dodaj nowy planner</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% for planner in planners %}
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 fw-bold mb-0">{{ planner.name }}</h2>
+            <div class="d-flex gap-2">
+                {% if planner.edit_mode %}
+                <a href="{% url 'planner:index' %}" class="btn btn-outline-secondary btn-sm">Anuluj</a>
+                <button type="submit" form="planner-form-{{ planner.name|slugify }}"
+                    class="btn btn-primary btn-sm">Zapisz plan</button>
+                {% else %}
+                <a href="{% url 'planner:index' %}?edit_plan={{ planner.name|urlencode }}"
+                    class="btn btn-outline-primary btn-sm">Edytuj plan</a>
+                {% endif %}
+                <form method="post" class="mb-0">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="plan_name" value="{{ planner.name }}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Usuń plan</button>
+                </form>
+            </div>
+        </div>
+
+        {% if planner.edit_mode %}
+        <form method="post" id="planner-form-{{ planner.name|slugify }}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="planner_name" value="{{ planner.name }}">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Dzień</th>
+                            <th scope="col">Obiad</th>
+                            <th scope="col">Kolacja</th>
+                            <th scope="col">Alternatywa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in planner.rows %}
+                        <tr>
+                            <td class="fw-semibold">{{ row.get_day_of_week_display }}</td>
+                            <td>
+                                <select name="recipe_dinner_{{ row.pk }}" class="form-select form-select-sm">
+                                    <option value="">-- brak --</option>
+                                    {% for recipe in recipes %}
+                                    <option value="{{ recipe.pk }}" {% if row.recipe_dinner_id == recipe.pk %}selected{% endif %}>{{ recipe.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="recipe_supper_{{ row.pk }}" class="form-select form-select-sm">
+                                    <option value="">-- brak --</option>
+                                    {% for recipe in recipes %}
+                                    <option value="{{ recipe.pk }}" {% if row.recipe_supper_id == recipe.pk %}selected{% endif %}>{{ recipe.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="recipe_dinner_alternative_{{ row.pk }}"
+                                    class="form-select form-select-sm">
+                                    <option value="">-- brak --</option>
+                                    {% for recipe in recipes %}
+                                    <option value="{{ recipe.pk }}" {% if row.recipe_dinner_alternative_id == recipe.pk %}selected{% endif %}>{{ recipe.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+        {% else %}
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Dzień</th>
+                        <th scope="col">Obiad</th>
+                        <th scope="col">Kolacja</th>
+                        <th scope="col">Alternatywa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in planner.rows %}
+                    <tr>
+                        <td class="fw-semibold">{{ row.get_day_of_week_display }}</td>
+                        <td>
+                            {% if row.recipe_dinner %}
+                            <button type="button" class="btn btn-link p-0 text-start recipe-trigger"
+                                data-recipe-name="{{ row.recipe_dinner.name|escape }}"
+                                data-recipe-description="{{ row.recipe_dinner.description|default:'Brak opisu'|escape }}"
+                                data-preparation-time="{{ row.recipe_dinner.preparation_time }}"
+                                data-servings="{{ row.recipe_dinner.servings }}"
+                                data-category="{{ row.recipe_dinner.category|default:'Brak kategorii'|escape }}"
+                                data-recipe-ingredients="{% for ingredient in row.recipe_dinner.ingredients.all %}{{ ingredient.ingredient.name }}{% if not forloop.last %}, {% endif %}{% empty %}Brak danych{% endfor %}">
+                                {{ row.recipe_dinner.name }}
+                            </button>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.recipe_supper %}
+                            <button type="button" class="btn btn-link p-0 text-start recipe-trigger"
+                                data-recipe-name="{{ row.recipe_supper.name|escape }}"
+                                data-recipe-description="{{ row.recipe_supper.description|default:'Brak opisu'|escape }}"
+                                data-preparation-time="{{ row.recipe_supper.preparation_time }}"
+                                data-servings="{{ row.recipe_supper.servings }}"
+                                data-category="{{ row.recipe_supper.category|default:'Brak kategorii'|escape }}"
+                                data-recipe-ingredients="{% for ingredient in row.recipe_supper.ingredients.all %}{{ ingredient.ingredient.name }}{% if not forloop.last %}, {% endif %}{% empty %}Brak danych{% endfor %}">
+                                {{ row.recipe_supper.name }}
+                            </button>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.recipe_dinner_alternative %}
+                            <button type="button" class="btn btn-link p-0 text-start recipe-trigger"
+                                data-recipe-name="{{ row.recipe_dinner_alternative.name|escape }}"
+                                data-recipe-description="{{ row.recipe_dinner_alternative.description|default:'Brak opisu'|escape }}"
+                                data-preparation-time="{{ row.recipe_dinner_alternative.preparation_time }}"
+                                data-servings="{{ row.recipe_dinner_alternative.servings }}"
+                                data-category="{{ row.recipe_dinner_alternative.category|default:'Brak kategorii'|escape }}"
+                                data-recipe-ingredients="{% for ingredient in row.recipe_dinner_alternative.ingredients.all %}{{ ingredient.ingredient.name }}{% if not forloop.last %}, {% endif %}{% empty %}Brak danych{% endfor %}">
+                                {{ row.recipe_dinner_alternative.name }}
+                            </button>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+<div class="modal fade" id="recipeModal" tabindex="-1" aria-labelledby="recipeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="recipeModalLabel">Szczegóły przepisu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body" id="recipeModalBody"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('recipeModal');
+        const modalTitle = document.getElementById('recipeModalLabel');
+        const modalBody = document.getElementById('recipeModalBody');
+
+        document.querySelectorAll('.recipe-trigger').forEach(function (button) {
+            button.addEventListener('click', function () {
+                modalTitle.textContent = button.dataset.recipeName || 'Przepis';
+                modalBody.innerHTML = '';
+
+                const description = document.createElement('p');
+                description.className = 'mb-3';
+                description.textContent = button.dataset.recipeDescription || 'Brak opisu';
+                modalBody.appendChild(description);
+
+                const metaList = document.createElement('ul');
+                metaList.className = 'list-unstyled small text-muted mb-0';
+                const metaItems = [
+                    ['Czas przygotowania', button.dataset.preparationTime + ' min'],
+                    ['Porcje', button.dataset.servings],
+                    ['Kategoria', button.dataset.category],
+                    ['Składniki', button.dataset.recipeIngredients || 'Brak danych']
+                ];
+
+                metaItems.forEach(function ([label, value]) {
+                    const item = document.createElement('li');
+                    item.className = 'mb-2';
+                    item.innerHTML = '<strong>' + label + ':</strong> ' + value;
+                    metaList.appendChild(item);
+                });
+                modalBody.appendChild(metaList);
+
+                const modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
+                modalInstance.show();
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}PlanNaTalerzu | Start{% endblock %}
+
+{% block content %}
+<div class="row align-items-center g-4">
+    <div class="col-lg-7">
+        <div class="p-4 p-lg-5 bg-white rounded-4 shadow-sm border">
+            <p class="text-primary fw-semibold mb-2">Django • Bootstrap • nowoczesny layout</p>
+            <h1 class="display-5 fw-bold mb-3">Planowanie posiłków i zakupów w jednym miejscu</h1>
+            <p class="lead text-muted mb-4">
+                Szybko zarządzaj przepisami, twórz plan posiłków i śledź listę zakupów bez zbędnego bałaganu.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary btn-lg" href="{% url 'planner:index' %}">Zaplanuj posiłki</a>
+                <a class="btn btn-outline-secondary btn-lg" href="{% url 'recipes:index' %}">Przeglądaj przepisy</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold mb-3">Co znajdziesz?</h2>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0">Planowanie posiłków na kolejne dni</li>
+                    <li class="list-group-item px-0">Przepisy z prostą strukturą danych</li>
+                    <li class="list-group-item px-0">Listę zakupów podsumowującą składniki</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

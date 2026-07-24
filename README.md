@@ -1,1 +1,45 @@
 # PlanNaTalerzu
+
+## Uruchamianie projektu lokalnie
+
+### 1. Aktywuj środowisko wirtualne
+
+Jeśli środowisko znajduje się w katalogu `.venv`, uruchom:
+
+```bash
+source .venv/bin/activate
+```
+
+### 2. Zainstaluj zależności
+
+Jeśli używasz PDM, zainstaluj zależności z pliku projektu:
+
+```bash
+pdm install
+```
+
+### 3. Uruchom migracje
+
+```bash
+python manage.py migrate
+```
+
+### 4. Uruchom serwer deweloperski
+
+```bash
+python manage.py runserver 8081
+```
+
+Po uruchomieniu aplikacja będzie dostępna pod adresem:
+
+```text
+http://127.0.0.1:8081/
+```
+
+### 5. Tworzenie superużytkownika
+
+Jeśli chcesz zalogować się do panelu administracyjnego Django:
+
+```bash
+python manage.py createsuperuser
+```

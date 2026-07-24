@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Przepisy{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="h3 fw-bold mb-0">
+                        {% if editing_recipe %}Edytuj przepis{% else %}Dodaj przepis{% endif %}
+                    </h1>
+                    {% if editing_recipe %}
+                    <a class="btn btn-outline-secondary btn-sm" href="{% url 'recipes:index' %}">Anuluj</a>
+                    {% endif %}
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="{% if editing_recipe %}update{% else %}create{% endif %}">
+                    {% if editing_recipe %}
+                    <input type="hidden" name="recipe_id" value="{{ editing_recipe.pk }}">
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Nazwa</label>
+                        <input class="form-control" id="name" name="name" value="{{ editing_recipe.name|default:'' }}"
+                            required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Opis</label>
+                        <textarea class="form-control" id="description" name="description"
+                            rows="3">{{ editing_recipe.description|default:'' }}</textarea>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label" for="preparation_time">Czas (min)</label>
+                            <input class="form-control" id="preparation_time" name="preparation_time" type="number"
+                                min="0" value="{{ editing_recipe.preparation_time|default:0 }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="servings">Porcje</label>
+                            <input class="form-control" id="servings" name="servings" type="number" min="1"
+                                value="{{ editing_recipe.servings|default:1 }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="category">Kategoria</label>
+                            <input class="form-control" id="category" name="category"
+                                value="{{ editing_recipe.category|default:'' }}">
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="form-label">Składniki przepisu</label>
+                        <div class="border rounded-3 p-3 bg-light">
+                            <div id="ingredient-rows">
+                                <div class="ingredient-row row g-2 align-items-end">
+                                    <div class="col-md-5">
+                                        <label class="form-label small" for="ingredient_id">Wybierz składnik</label>
+                                        <select class="form-select" id="ingredient_id" name="ingredient_id[]">
+                                            <option value="">-- wybierz składnik --</option>
+                                            {% for ingredient in ingredients %}
+                                            <option value="{{ ingredient.pk }}">{{ ingredient.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small" for="ingredient_amount">Ilość</label>
+                                        <input class="form-control" id="ingredient_amount" name="ingredient_amount[]"
+                                            type="number" min="0" step="0.01" placeholder="2">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small" for="ingredient_unit">Jednostka</label>
+                                        <input class="form-control" id="ingredient_unit" name="ingredient_unit[]"
+                                            placeholder="g / szt / ml">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small" for="new_ingredient_name">Nowy składnik</label>
+                                        <input class="form-control" id="new_ingredient_name"
+                                            name="new_ingredient_name[]" placeholder="np. marchewka">
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button class="btn btn-sm btn-outline-danger remove-ingredient-row"
+                                            type="button" title="Usuń wiersz">−</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-3">
+                                <button class="btn btn-sm btn-outline-primary add-ingredient-row" type="button"
+                                    title="Dodaj składnik">+</button>
+                            </div>
+
+                            <div class="form-text mt-2">Wybierz istniejący składnik albo wpisz nową nazwę, jeśli jeszcze
+                                nie ma go w bazie.</div>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const rowsWrapper = document.getElementById('ingredient-rows');
+                            const addButton = document.querySelector('.add-ingredient-row');
+
+                            if (!rowsWrapper || !addButton) {
+                                return;
+                            }
+
+                            addButton.addEventListener('click', function () {
+                                const templateRow = rowsWrapper.querySelector('.ingredient-row');
+                                const newRow = templateRow.cloneNode(true);
+                                const rowIndex = rowsWrapper.querySelectorAll('.ingredient-row').length;
+
+                                newRow.querySelectorAll('input, select').forEach(function (field) {
+                                    field.value = '';
+                                    if (field.id) {
+                                        field.id = field.id + '-' + rowIndex;
+                                    }
+                                });
+
+                                newRow.querySelectorAll('label').forEach(function (label) {
+                                    const forValue = label.getAttribute('for');
+                                    if (forValue) {
+                                        label.setAttribute('for', forValue + '-' + rowIndex);
+                                    }
+                                });
+
+                                rowsWrapper.appendChild(newRow);
+                            });
+
+                            rowsWrapper.addEventListener('click', function (event) {
+                                const button = event.target.closest('.remove-ingredient-row');
+                                if (!button) {
+                                    return;
+                                }
+
+                                const rows = rowsWrapper.querySelectorAll('.ingredient-row');
+                                if (rows.length > 1) {
+                                    button.closest('.ingredient-row').remove();
+                                }
+                            });
+                        });
+                    </script>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button class="btn btn-primary" type="submit">
+                            {% if editing_recipe %}Zapisz zmiany{% else %}Dodaj przepis{% endif %}
+                        </button>
+                        <a class="btn btn-outline-secondary" href="{% url 'home' %}">Powrót do startu</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h3 fw-bold mb-0">Lista przepisów</h2>
+                    <span class="badge bg-light text-dark">{{ recipes|length }} pozycji</span>
+                </div>
+
+                {% if recipes %}
+                <div class="list-group">
+                    {% for recipe in recipes %}
+                    <div class="list-group-item px-0 py-3 border-0 border-bottom">
+                        <div class="d-flex justify-content-between gap-3 align-items-start">
+                            <div>
+                                <h3 class="h6 fw-bold mb-1">{{ recipe.name }}</h3>
+                                <p class="text-muted small mb-2">{{ recipe.description|default:"Brak opisu" }}</p>
+                                <div class="small text-muted">
+                                    <span class="me-3">⏱ {{ recipe.preparation_time }} min</span>
+                                    <span class="me-3">👥 {{ recipe.servings }} porc.</span>
+                                    {% if recipe.category %}<span>{{ recipe.category }}</span>{% endif %}
+                                </div>
+                                {% if recipe.ingredients.all %}
+                                <div class="mt-2">
+                                    <span class="fw-semibold small">Składniki:</span>
+                                    <span class="small text-muted">
+                                        {% for relation in recipe.ingredients.all %}
+                                        {% if not forloop.first %}, {% endif %}{{ relation.ingredient.name }}
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a class="btn btn-outline-primary btn-sm"
+                                    href="{% url 'recipes:index' %}?edit={{ recipe.pk }}">Edytuj</a>
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="recipe_id" value="{{ recipe.pk }}">
+                                    <button class="btn btn-outline-danger btn-sm" type="submit">Usuń</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-muted">Brak przepisów. Dodaj pierwszy przepis.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
