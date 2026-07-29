@@ -1,0 +1,21 @@
+# copy that file to /etc/systemd/system
+[Unit]
+Description=PlanNaTalerzu dev server
+After=network.target
+
+[Service]
+User=oberos
+Group=oberos
+WorkingDirectory=/home/oberos/PlanNaTalerzu
+
+Environment="PATH=/home/oberos/PlanNaTalerzu/.venv/bin"
+Environment="ALLOWED_HOSTS=*"
+Environment="DEBUG=True"
+
+ExecStart=/home/oberos/PlanNaTalerzu/.venv/bin/python /home/oberos/PlanNaTalerzu/plannatalerzu/manage.py runserver 0.0.0.0:8001
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
