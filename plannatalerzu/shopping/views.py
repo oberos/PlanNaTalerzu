@@ -31,12 +31,16 @@ def shopping_index(request):
         # Zbierz wszystkie unikalne przepisy
         recipe_ids = set()
         for plan in plans:
-            if plan.recipe_dinner_id:
-                recipe_ids.add(plan.recipe_dinner_id)
-            if plan.recipe_dinner_alternative_id:
-                recipe_ids.add(plan.recipe_dinner_alternative_id)
-            if plan.recipe_supper_id:
-                recipe_ids.add(plan.recipe_supper_id)
+            rd_id = getattr(plan, "recipe_dinner_id", None)
+            rda_id = getattr(plan, "recipe_dinner_alternative_id", None)
+            rs_id = getattr(plan, "recipe_supper_id", None)
+
+            if rd_id:
+                recipe_ids.add(rd_id)
+            if rda_id:
+                recipe_ids.add(rda_id)
+            if rs_id:
+                recipe_ids.add(rs_id)
 
         if recipe_ids:
             # Pobierz wszystkie składniki z tych przepisów
@@ -57,9 +61,14 @@ def shopping_index(request):
             # Agreguj składniki z konwersją jednostek
             shopping_list = aggregate_ingredients(ingredients_data)
 
-            # Grupuj po kategorii
+            # Grupuj po kategorii: najpierw posortuj według znormalizowanej kategorii
+            # (case-insensitive, trim), a następnie grupuj kolejne elementy.
+            def _norm_cat(x):
+                return (x.get("ingredient_category") or "Inne").strip().lower()
+
+            shopping_list.sort(key=_norm_cat)
             grouped_list = []
-            for category, items in groupby(shopping_list, key=lambda x: x["ingredient_category"] or "Inne"):
+            for category, items in groupby(shopping_list, key=_norm_cat):
                 grouped_list.append(
                     {
                         "category": category,

@@ -249,3 +249,30 @@ class ShoppingViewTest(TestCase):
         # Mąka: 200g + 300g = 500g
         self.assertContains(response, "500")
         self.assertContains(response, "g")
+
+    def test_shopping_grouping_case_insensitive(self):
+        """Kategoria powinna być grupowana case-insensitive (nie duplikować grup)."""
+        # Utwórz składniki z tą samą kategorią różniącą się tylko wielkością liter
+        ing1 = Ingredient.objects.create(name="Ser", category="nabiał")
+        ing2 = Ingredient.objects.create(name="Jogurt", category="NABIAŁ")
+
+        # Utwórz przepisy i przypisz składniki
+        r1 = Recipe.objects.create(name="R1", preparation_time=10)
+        r2 = Recipe.objects.create(name="R2", preparation_time=10)
+        RecipeIngredient.objects.create(recipe=r1, ingredient=ing1, amount=1, unit="szt")
+        RecipeIngredient.objects.create(recipe=r2, ingredient=ing2, amount=1, unit="szt")
+
+        # Plan zawierający oba przepisy
+        MealPlan.objects.create(
+            name="PlanCase",
+            day_of_week="Wtorek",
+            recipe_dinner=r1,
+            recipe_supper=r2,
+        )
+
+        response = self.client.get(reverse("shopping:index"), {"plan": "PlanCase"})
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        # Powinien pojawić się dokładnie jeden badge kategorii
+        badge_count = content.count('<span class="badge bg-light text-dark">')
+        self.assertEqual(badge_count, 1)
