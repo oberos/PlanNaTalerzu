@@ -16,7 +16,7 @@
                     {% endif %}
                 </div>
 
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="{% if editing_recipe %}update{% else %}create{% endif %}">
                     {% if editing_recipe %}
@@ -58,6 +58,23 @@
                             <input class="form-control" id="category" name="category"
                                 value="{{ editing_recipe.category|default:'' }}">
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="image">Zdjęcie przepisu</label>
+                        {% if editing_recipe.image %}
+                        <div class="mb-2">
+                            <img src="{{ editing_recipe.image.url }}" alt="Aktualne zdjęcie" 
+                                 class="img-thumbnail" style="max-height: 150px;">
+                            <div class="form-check mt-1">
+                                <input type="checkbox" class="form-check-input" id="image_clear" name="image_clear">
+                                <label class="form-check-label small" for="image_clear">Usuń zdjęcie</label>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <input type="file" class="form-control" id="image" name="image" 
+                               accept="image/jpeg,image/png,image/webp,image/gif">
+                        <div class="form-text">Opcjonalne. Max 5MB, formaty: JPG, PNG, WebP, GIF</div>
                     </div>
 
                     <div class="mt-4">
@@ -115,11 +132,11 @@
                 <div id="select-ingredient-section">
                     <div class="mb-3">
                         <label class="form-label" for="modal-ingredient-select">Wybierz składnik</label>
-                        <select class="form-select" id="modal-ingredient-select">
-                            <option value="">-- wybierz składnik --</option>
+                        <select id="modal-ingredient-select" placeholder="Wpisz nazwę składnika...">
+                            <option value=""></option>
                             {% for ingredient in ingredients %}
-                            <option value="{{ ingredient.pk }}" data-name="{{ ingredient.name }}" data-unit="{{ ingredient.default_unit }}">
-                                {{ ingredient.name }}
+                            <option value="{{ ingredient.pk }}" data-name="{{ ingredient.name }}" data-unit="{{ ingredient.default_unit }}" data-category="{{ ingredient.category }}">
+                                {{ ingredient.name }}{% if ingredient.category %} ({{ ingredient.category }}){% endif %}
                             </option>
                             {% endfor %}
                         </select>
@@ -222,7 +239,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const ingredientsList = document.getElementById('added-ingredients-list');
     const noIngredientsMsg = document.getElementById('no-ingredients-message');
-    const ingredientSelect = document.getElementById('modal-ingredient-select');
+    const ingredientSelectEl = document.getElementById('modal-ingredient-select');
     const amountInput = document.getElementById('modal-ingredient-amount');
     const unitSelect = document.getElementById('modal-ingredient-unit');
     const addBtn = document.getElementById('add-selected-ingredient');
@@ -235,9 +252,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const newIngredientCategoryInput = document.getElementById('new-ingredient-category');
     const modal = document.getElementById('ingredientModal');
     
+    // Inicjalizacja Tom Select
+    const ingredientSelect = new TomSelect('#modal-ingredient-select', {
+        placeholder: 'Wpisz nazwę składnika...',
+        highlight: true,
+        searchField: ['text'],
+        sortField: { field: 'text', direction: 'asc' },
+        render: {
+            option: function(data, escape) {
+                const category = data.$option?.dataset?.category;
+                return `<div>
+                    <span class="fw-medium">${escape(data.$option?.dataset?.name || data.text)}</span>
+                    ${category ? `<span class="text-muted small"> (${escape(category)})</span>` : ''}
+                </div>`;
+            },
+            item: function(data, escape) {
+                return `<div>${escape(data.$option?.dataset?.name || data.text)}</div>`;
+            }
+        },
+        onChange: function(value) {
+            if (value) {
+                const option = ingredientSelectEl.querySelector(`option[value="${value}"]`);
+                const defaultUnit = option?.dataset?.unit;
+                if (defaultUnit) {
+                    unitSelect.value = defaultUnit;
+                }
+            }
+            updateAddButtonState();
+        }
+    });
+    
     // Aktualizuj stan przycisku "Dodaj"
     function updateAddButtonState() {
-        const hasIngredient = ingredientSelect.value !== '';
+        const hasIngredient = ingredientSelect.getValue() !== '';
         const hasAmount = amountInput.value !== '' && parseFloat(amountInput.value) > 0;
         addBtn.disabled = !(hasIngredient && hasAmount);
     }
@@ -248,22 +295,13 @@ document.addEventListener('DOMContentLoaded', function() {
         noIngredientsMsg.style.display = hasIngredients ? 'none' : 'block';
     }
     
-    // Ustaw domyślną jednostkę na podstawie wybranego składnika
-    ingredientSelect.addEventListener('change', function() {
-        const selected = this.options[this.selectedIndex];
-        const defaultUnit = selected.dataset.unit;
-        if (defaultUnit) {
-            unitSelect.value = defaultUnit;
-        }
-        updateAddButtonState();
-    });
-    
     amountInput.addEventListener('input', updateAddButtonState);
     
     // Dodaj wybrany składnik do listy
     addBtn.addEventListener('click', function() {
-        const ingredientId = ingredientSelect.value;
-        const ingredientName = ingredientSelect.options[ingredientSelect.selectedIndex].dataset.name;
+        const ingredientId = ingredientSelect.getValue();
+        const option = ingredientSelectEl.querySelector(`option[value="${ingredientId}"]`);
+        const ingredientName = option?.dataset?.name || '';
         const amount = amountInput.value;
         const unit = unitSelect.value;
         
@@ -294,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateNoIngredientsMessage();
         
         // Reset formularza w modalu
-        ingredientSelect.value = '';
+        ingredientSelect.clear();
         amountInput.value = '';
         unitSelect.value = 'g';
         updateAddButtonState();
@@ -368,26 +406,31 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Dodaj nowy składnik do selecta
-                const option = document.createElement('option');
-                option.value = data.id;
-                option.dataset.name = data.name;
-                option.dataset.unit = data.default_unit || 'g';
-                option.textContent = data.name;
-                ingredientSelect.appendChild(option);
-                
-                // Sortuj opcje alfabetycznie
-                const options = Array.from(ingredientSelect.options);
-                options.sort((a, b) => {
-                    if (a.value === '') return -1;
-                    if (b.value === '') return 1;
-                    return a.text.localeCompare(b.text, 'pl');
+                // Dodaj nowy składnik do Tom Select
+                const displayText = data.name + (data.category ? ` (${data.category})` : '');
+                ingredientSelect.addOption({
+                    value: data.id,
+                    text: displayText,
+                    $option: {
+                        dataset: {
+                            name: data.name,
+                            unit: data.default_unit || 'g',
+                            category: data.category || ''
+                        }
+                    }
                 });
-                ingredientSelect.innerHTML = '';
-                options.forEach(opt => ingredientSelect.appendChild(opt));
+                
+                // Dodaj też do natywnego selecta (dla renderowania)
+                const nativeOption = document.createElement('option');
+                nativeOption.value = data.id;
+                nativeOption.dataset.name = data.name;
+                nativeOption.dataset.unit = data.default_unit || 'g';
+                nativeOption.dataset.category = data.category || '';
+                nativeOption.textContent = displayText;
+                ingredientSelectEl.appendChild(nativeOption);
                 
                 // Wybierz nowo utworzony składnik
-                ingredientSelect.value = data.id;
+                ingredientSelect.setValue(data.id);
                 
                 // Wróć do widoku wyboru i wyczyść formularz
                 newIngredientSection.style.display = 'none';
@@ -416,7 +459,7 @@ document.addEventListener('DOMContentLoaded', function() {
     modal.addEventListener('hidden.bs.modal', function() {
         newIngredientSection.style.display = 'none';
         selectSection.style.display = 'block';
-        ingredientSelect.value = '';
+        ingredientSelect.clear();
         amountInput.value = '';
         unitSelect.value = 'g';
         newIngredientNameInput.value = '';
@@ -457,7 +500,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     {% for recipe in recipes %}
                     <div class="list-group-item px-0 py-3 border-0 border-bottom">
                         <div class="d-flex justify-content-between gap-3 align-items-start">
-                            <div>
+                            {% if recipe.image %}
+                            <div class="flex-shrink-0">
+                                <img src="{{ recipe.image.url }}" alt="{{ recipe.name }}" 
+                                     class="rounded" style="width: 100px; height: 75px; object-fit: cover;">
+                            </div>
+                            {% endif %}
+                            <div class="flex-grow-1">
                                 <h3 class="h6 fw-bold mb-1">{{ recipe.name }}</h3>
                                 <p class="text-muted small mb-2">{{ recipe.description|default:"Brak opisu" }}</p>
                                 <div class="small text-muted">
@@ -537,7 +586,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 {% endif %}
                                 {% endwith %}
                             </div>
-                            <div class="d-flex gap-2">
+                            <div class="d-flex gap-2 flex-shrink-0">
                                 <a class="btn btn-outline-primary btn-sm"
                                     href="{% url 'recipes:index' %}?edit={{ recipe.pk }}">Edytuj</a>
                                 <form method="post" class="d-inline">

@@ -96,7 +96,7 @@ def _parse_amount_string(amount_str: str) -> float:
         if len(parts) == 2:
             try:
                 return float(parts[0]) / float(parts[1])
-            except ValueError, ZeroDivisionError:
+            except (ValueError, ZeroDivisionError):
                 return 0
 
     try:

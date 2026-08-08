@@ -116,6 +116,7 @@ def recipe_index(request):
                         "id": existing.pk,
                         "name": existing.name,
                         "default_unit": existing.default_unit or "g",
+                        "category": existing.category or "",
                         "message": "Składnik już istnieje.",
                     }
                 )
@@ -140,11 +141,20 @@ def recipe_index(request):
                 )
 
             return JsonResponse(
-                {"success": True, "id": ingredient.pk, "name": ingredient.name, "default_unit": ingredient.default_unit}
+                {
+                    "success": True,
+                    "id": ingredient.pk,
+                    "name": ingredient.name,
+                    "default_unit": ingredient.default_unit,
+                    "category": ingredient.category or "",
+                }
             )
 
         if action == "delete":
             recipe = get_object_or_404(Recipe, pk=request.POST.get("recipe_id"))
+            # Usuń plik obrazu jeśli istnieje
+            if recipe.image:
+                recipe.image.delete(save=False)
             recipe.delete()
             return redirect("recipes:index")
 
@@ -173,6 +183,30 @@ def recipe_index(request):
                 recipe = None
 
             if recipe is not None:
+                # Obsługa obrazu
+                if "image" in request.FILES:
+                    image = request.FILES["image"]
+                    # Walidacja formatu
+                    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+                    if image.content_type not in allowed_types:
+                        pass  # Ignoruj nieprawidłowy format
+                    # Walidacja rozmiaru (max 5MB)
+                    elif image.size > 5 * 1024 * 1024:
+                        pass  # Ignoruj za duży plik
+                    else:
+                        # Usuń stary obraz jeśli istnieje
+                        if recipe.image:
+                            recipe.image.delete(save=False)
+                        recipe.image = image
+                        recipe.save(update_fields=["image"])
+
+                # Usuwanie obrazu
+                if request.POST.get("image_clear"):
+                    if recipe.image:
+                        recipe.image.delete(save=False)
+                    recipe.image = None
+                    recipe.save(update_fields=["image"])
+
                 _add_recipe_ingredients_from_post(recipe, request)
 
         return redirect("recipes:index")
