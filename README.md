@@ -55,3 +55,31 @@ python manage.py loaddata ingredients
 ```
 
 Fixture znajduje się w `recipes/fixtures/ingredients.json`.
+
+### 7. Zrzucanie aktualnych danych przepisów i składników do fixture
+
+Możesz wygenerować aktualny plik fixture JSON z danych bazy dla całego modułu `recipes`:
+
+```bash
+python manage.py dump_recipe_fixtures
+```
+
+Lub użyj gotowego skryptu repozytorium:
+
+```bash
+./dump_recipe_fixtures.sh
+```
+
+Domyślny plik wyjściowy to `recipes/fixtures/recipe_data.json`.
+
+Aby załadować ten fixture po odtworzeniu projektu:
+
+```bash
+python manage.py loaddata recipes/fixtures/recipe_data.json
+```
+
+Lub użyj gotowego skryptu repozytorium:
+
+```bash
+./load_recipe_fixtures.sh
+```
