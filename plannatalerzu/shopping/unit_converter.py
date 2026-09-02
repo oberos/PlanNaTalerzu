@@ -163,7 +163,7 @@ def aggregate_ingredients(ingredients_data: list[dict]) -> list[dict]:
                 "ingredient_id": ingredient_id,
                 "ingredient_name": ingredient_name,
                 "ingredient_category": ingredient_category,
-                "base_amount": Decimal("0"),
+                "base_amount": Decimal(0),
                 "base_unit": converted.base_unit,
                 "original_entries": [],
             }
