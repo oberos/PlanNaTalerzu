@@ -60,22 +60,7 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label" for="image">Zdjęcie przepisu</label>
-                        {% if editing_recipe.image %}
-                        <div class="mb-2">
-                            <img src="{{ editing_recipe.image.url }}" alt="Aktualne zdjęcie" 
-                                 class="img-thumbnail" style="max-height: 150px;">
-                            <div class="form-check mt-1">
-                                <input type="checkbox" class="form-check-input" id="image_clear" name="image_clear">
-                                <label class="form-check-label small" for="image_clear">Usuń zdjęcie</label>
-                            </div>
-                        </div>
-                        {% endif %}
-                        <input type="file" class="form-control" id="image" name="image" 
-                               accept="image/jpeg,image/png,image/webp,image/gif">
-                        <div class="form-text">Opcjonalne. Max 5MB, formaty: JPG, PNG, WebP, GIF</div>
-                    </div>
+
 
                     <div class="mt-4">
                         <label class="form-label">Składniki przepisu</label>
@@ -84,7 +69,8 @@
                             <div id="added-ingredients-list" class="mb-3">
                                 {% if editing_recipe %}
                                 {% for rel in editing_recipe.ingredients.all %}
-                                <div class="ingredient-item d-flex align-items-center gap-2 mb-2 p-2 bg-white rounded border">
+                                <div
+                                    class="ingredient-item d-flex align-items-center gap-2 mb-2 p-2 bg-white rounded border">
                                     <input type="hidden" name="ingredient_id" value="{{ rel.ingredient.pk }}">
                                     <input type="hidden" name="ingredient_amount" value="{{ rel.amount }}">
                                     <input type="hidden" name="ingredient_unit" value="{{ rel.unit }}">
@@ -92,17 +78,25 @@
                                         <strong>{{ rel.ingredient.name }}</strong>
                                         <span class="text-muted">— {{ rel.amount }} {{ rel.unit }}</span>
                                     </span>
-                                    <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient" title="Usuń">×</button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient"
+                                        title="Usuń">×</button>
                                 </div>
                                 {% endfor %}
                                 {% endif %}
                             </div>
-                            
-                            <div id="no-ingredients-message" class="text-muted small mb-3" {% if editing_recipe.ingredients.all %}style="display: none;"{% endif %}>
+
+                            {% if editing_recipe and editing_recipe.ingredients.all %}
+                            <div id="no-ingredients-message" class="text-muted small mb-3" style="display: none;">
                                 Brak dodanych składników. Kliknij przycisk poniżej, aby dodać.
                             </div>
+                            {% else %}
+                            <div id="no-ingredients-message" class="text-muted small mb-3">
+                                Brak dodanych składników. Kliknij przycisk poniżej, aby dodać.
+                            </div>
+                            {% endif %}
 
-                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#ingredientModal">
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                data-bs-target="#ingredientModal">
                                 + Dodaj składnik
                             </button>
                         </div>
@@ -119,205 +113,221 @@
         </div>
     </div>
 
-<!-- Modal dodawania składnika -->
-<div class="modal fade" id="ingredientModal" tabindex="-1" aria-labelledby="ingredientModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="ingredientModalLabel">Dodaj składnik do przepisu</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Wybór istniejącego składnika -->
-                <div id="select-ingredient-section">
-                    <div class="mb-3">
-                        <label class="form-label" for="modal-ingredient-select">Wybierz składnik</label>
-                        <select id="modal-ingredient-select" placeholder="Wpisz nazwę składnika...">
-                            <option value=""></option>
-                            {% for ingredient in ingredients %}
-                            <option value="{{ ingredient.pk }}" data-name="{{ ingredient.name }}" data-unit="{{ ingredient.default_unit }}" data-category="{{ ingredient.category }}">
-                                {{ ingredient.name }}{% if ingredient.category %} ({{ ingredient.category }}){% endif %}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label" for="modal-ingredient-amount">Ilość</label>
-                            <input type="number" class="form-control" id="modal-ingredient-amount" min="0" step="0.01" placeholder="np. 200">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label" for="modal-ingredient-unit">Jednostka</label>
-                            <select class="form-select" id="modal-ingredient-unit">
-                                <option value="g">g (gramy)</option>
-                                <option value="kg">kg (kilogramy)</option>
-                                <option value="ml">ml (mililitry)</option>
-                                <option value="l">l (litry)</option>
-                                <option value="szt">szt (sztuki)</option>
-                                <option value="łyżka">łyżka</option>
-                                <option value="łyżeczka">łyżeczka</option>
-                                <option value="szklanka">szklanka</option>
-                                <option value="szczypta">szczypta</option>
+    <!-- Modal dodawania składnika -->
+    <div class="modal fade" id="ingredientModal" tabindex="-1" aria-labelledby="ingredientModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ingredientModalLabel">Dodaj składnik do przepisu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Wybór istniejącego składnika -->
+                    <div id="select-ingredient-section">
+                        <div class="mb-3">
+                            <label class="form-label" for="modal-ingredient-select">Wybierz składnik</label>
+                            <select id="modal-ingredient-select" placeholder="Wpisz nazwę składnika...">
+                                <option value=""></option>
+                                {% for ingredient in ingredients %}
+                                <option value="{{ ingredient.pk }}" data-name="{{ ingredient.name }}"
+                                    data-unit="{{ ingredient.default_unit }}" data-category="{{ ingredient.category }}">
+                                    {{ ingredient.name }}{% if ingredient.category %} ({{ ingredient.category }})
+                                    {% endif %}</option>
+                                {% endfor %}
                             </select>
                         </div>
-                    </div>
-                    
-                    <button type="button" class="btn btn-primary w-100" id="add-selected-ingredient" disabled>
-                        Dodaj do przepisu
-                    </button>
-                    
-                    <hr class="my-4">
-                    
-                    <p class="text-muted small mb-2">Nie znalazłeś składnika na liście?</p>
-                    <button type="button" class="btn btn-outline-secondary w-100" id="show-new-ingredient-form">
-                        Utwórz nowy składnik
-                    </button>
-                </div>
-                
-                <!-- Formularz nowego składnika -->
-                <div id="new-ingredient-section" style="display: none;">
-                    <div class="mb-3">
-                        <label class="form-label" for="new-ingredient-name-input">Nazwa nowego składnika</label>
-                        <input type="text" class="form-control" id="new-ingredient-name-input" placeholder="np. tofu">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label" for="new-ingredient-category">Kategoria (opcjonalnie)</label>
-                        <input type="text" class="form-control" id="new-ingredient-category" placeholder="np. nabiał, warzywa">
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label" for="modal-ingredient-amount">Ilość</label>
+                                <input type="number" class="form-control" id="modal-ingredient-amount" min="0"
+                                    step="0.01" placeholder="np. 200">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" for="modal-ingredient-unit">Jednostka</label>
+                                <select class="form-select" id="modal-ingredient-unit">
+                                    <option value="g">g (gramy)</option>
+                                    <option value="kg">kg (kilogramy)</option>
+                                    <option value="ml">ml (mililitry)</option>
+                                    <option value="l">l (litry)</option>
+                                    <option value="szt">szt (sztuki)</option>
+                                    <option value="łyżka">łyżka</option>
+                                    <option value="łyżeczka">łyżeczka</option>
+                                    <option value="szklanka">szklanka</option>
+                                    <option value="szczypta">szczypta</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary w-100" id="add-selected-ingredient" disabled>
+                            Dodaj do przepisu
+                        </button>
+
+                        <hr class="my-4">
+
+                        <p class="text-muted small mb-2">Nie znalazłeś składnika na liście?</p>
+                        <button type="button" class="btn btn-outline-secondary w-100" id="show-new-ingredient-form">
+                            Utwórz nowy składnik
+                        </button>
                     </div>
 
-                    <!-- Wartości odżywcze -->
-                    <div class="mb-3">
-                        <a class="small text-decoration-none" data-bs-toggle="collapse" href="#nutrition-fields" role="button" aria-expanded="false">
-                            🥗 Dodaj wartości odżywcze (opcjonalnie)
-                        </a>
-                        <div class="collapse mt-2" id="nutrition-fields">
-                            <div class="card card-body bg-light py-2 px-3">
-                                <p class="small text-muted mb-2">Wartości na 100g/100ml:</p>
-                                <div class="row g-2">
-                                    <div class="col-6 col-md-4">
-                                        <label class="form-label small" for="new-ingredient-calories">Kalorie (kcal)</label>
-                                        <input type="number" class="form-control form-control-sm" id="new-ingredient-calories" min="0" step="0.1" placeholder="0">
-                                    </div>
-                                    <div class="col-6 col-md-4">
-                                        <label class="form-label small" for="new-ingredient-protein">Białko (g)</label>
-                                        <input type="number" class="form-control form-control-sm" id="new-ingredient-protein" min="0" step="0.1" placeholder="0">
-                                    </div>
-                                    <div class="col-6 col-md-4">
-                                        <label class="form-label small" for="new-ingredient-carbs">Węglowodany (g)</label>
-                                        <input type="number" class="form-control form-control-sm" id="new-ingredient-carbs" min="0" step="0.1" placeholder="0">
-                                    </div>
-                                    <div class="col-6 col-md-4">
-                                        <label class="form-label small" for="new-ingredient-fat">Tłuszcze (g)</label>
-                                        <input type="number" class="form-control form-control-sm" id="new-ingredient-fat" min="0" step="0.1" placeholder="0">
-                                    </div>
-                                    <div class="col-6 col-md-4">
-                                        <label class="form-label small" for="new-ingredient-fiber">Błonnik (g)</label>
-                                        <input type="number" class="form-control form-control-sm" id="new-ingredient-fiber" min="0" step="0.1" placeholder="0">
+                    <!-- Formularz nowego składnika -->
+                    <div id="new-ingredient-section" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label" for="new-ingredient-name-input">Nazwa nowego składnika</label>
+                            <input type="text" class="form-control" id="new-ingredient-name-input"
+                                placeholder="np. tofu">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="new-ingredient-category">Kategoria (opcjonalnie)</label>
+                            <input type="text" class="form-control" id="new-ingredient-category"
+                                placeholder="np. nabiał, warzywa">
+                        </div>
+
+                        <!-- Wartości odżywcze -->
+                        <div class="mb-3">
+                            <a class="small text-decoration-none" data-bs-toggle="collapse" href="#nutrition-fields"
+                                role="button" aria-expanded="false">
+                                🥗 Dodaj wartości odżywcze (opcjonalnie)
+                            </a>
+                            <div class="collapse mt-2" id="nutrition-fields">
+                                <div class="card card-body bg-light py-2 px-3">
+                                    <p class="small text-muted mb-2">Wartości na 100g/100ml:</p>
+                                    <div class="row g-2">
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small" for="new-ingredient-calories">Kalorie
+                                                (kcal)</label>
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="new-ingredient-calories" min="0" step="0.1" placeholder="0">
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small" for="new-ingredient-protein">Białko
+                                                (g)</label>
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="new-ingredient-protein" min="0" step="0.1" placeholder="0">
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small" for="new-ingredient-carbs">Węglowodany
+                                                (g)</label>
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="new-ingredient-carbs" min="0" step="0.1" placeholder="0">
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small" for="new-ingredient-fat">Tłuszcze
+                                                (g)</label>
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="new-ingredient-fat" min="0" step="0.1" placeholder="0">
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small" for="new-ingredient-fiber">Błonnik
+                                                (g)</label>
+                                            <input type="number" class="form-control form-control-sm"
+                                                id="new-ingredient-fiber" min="0" step="0.1" placeholder="0">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-secondary flex-grow-1" id="back-to-select">
-                            ← Wróć
-                        </button>
-                        <button type="button" class="btn btn-success flex-grow-1" id="create-new-ingredient">
-                            Utwórz składnik
-                        </button>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary flex-grow-1" id="back-to-select">
+                                ← Wróć
+                            </button>
+                            <button type="button" class="btn btn-success flex-grow-1" id="create-new-ingredient">
+                                Utwórz składnik
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const ingredientsList = document.getElementById('added-ingredients-list');
-    const noIngredientsMsg = document.getElementById('no-ingredients-message');
-    const ingredientSelectEl = document.getElementById('modal-ingredient-select');
-    const amountInput = document.getElementById('modal-ingredient-amount');
-    const unitSelect = document.getElementById('modal-ingredient-unit');
-    const addBtn = document.getElementById('add-selected-ingredient');
-    const selectSection = document.getElementById('select-ingredient-section');
-    const newIngredientSection = document.getElementById('new-ingredient-section');
-    const showNewFormBtn = document.getElementById('show-new-ingredient-form');
-    const backToSelectBtn = document.getElementById('back-to-select');
-    const createNewBtn = document.getElementById('create-new-ingredient');
-    const newIngredientNameInput = document.getElementById('new-ingredient-name-input');
-    const newIngredientCategoryInput = document.getElementById('new-ingredient-category');
-    const modal = document.getElementById('ingredientModal');
-    
-    // Inicjalizacja Tom Select
-    const ingredientSelect = new TomSelect('#modal-ingredient-select', {
-        placeholder: 'Wpisz nazwę składnika...',
-        highlight: true,
-        searchField: ['text'],
-        sortField: { field: 'text', direction: 'asc' },
-        render: {
-            option: function(data, escape) {
-                const category = data.$option?.dataset?.category;
-                return `<div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ingredientsList = document.getElementById('added-ingredients-list');
+            const noIngredientsMsg = document.getElementById('no-ingredients-message');
+            const ingredientSelectEl = document.getElementById('modal-ingredient-select');
+            const amountInput = document.getElementById('modal-ingredient-amount');
+            const unitSelect = document.getElementById('modal-ingredient-unit');
+            const addBtn = document.getElementById('add-selected-ingredient');
+            const selectSection = document.getElementById('select-ingredient-section');
+            const newIngredientSection = document.getElementById('new-ingredient-section');
+            const showNewFormBtn = document.getElementById('show-new-ingredient-form');
+            const backToSelectBtn = document.getElementById('back-to-select');
+            const createNewBtn = document.getElementById('create-new-ingredient');
+            const newIngredientNameInput = document.getElementById('new-ingredient-name-input');
+            const newIngredientCategoryInput = document.getElementById('new-ingredient-category');
+            const modal = document.getElementById('ingredientModal');
+
+            // Inicjalizacja Tom Select
+            const ingredientSelect = new TomSelect('#modal-ingredient-select', {
+                placeholder: 'Wpisz nazwę składnika...',
+                highlight: true,
+                searchField: ['text'],
+                sortField: { field: 'text', direction: 'asc' },
+                render: {
+                    option: function (data, escape) {
+                        const category = data.$option?.dataset?.category;
+                        return `<div>
                     <span class="fw-medium">${escape(data.$option?.dataset?.name || data.text)}</span>
                     ${category ? `<span class="text-muted small"> (${escape(category)})</span>` : ''}
                 </div>`;
-            },
-            item: function(data, escape) {
-                return `<div>${escape(data.$option?.dataset?.name || data.text)}</div>`;
-            }
-        },
-        onChange: function(value) {
-            if (value) {
-                const option = ingredientSelectEl.querySelector(`option[value="${value}"]`);
-                const defaultUnit = option?.dataset?.unit;
-                if (defaultUnit) {
-                    unitSelect.value = defaultUnit;
+                    },
+                    item: function (data, escape) {
+                        return `<div>${escape(data.$option?.dataset?.name || data.text)}</div>`;
+                    }
+                },
+                onChange: function (value) {
+                    if (value) {
+                        const option = ingredientSelectEl.querySelector(`option[value="${value}"]`);
+                        const defaultUnit = option?.dataset?.unit;
+                        if (defaultUnit) {
+                            unitSelect.value = defaultUnit;
+                        }
+                    }
+                    updateAddButtonState();
                 }
+            });
+
+            // Aktualizuj stan przycisku "Dodaj"
+            function updateAddButtonState() {
+                const hasIngredient = ingredientSelect.getValue() !== '';
+                const hasAmount = amountInput.value !== '' && parseFloat(amountInput.value) > 0;
+                addBtn.disabled = !(hasIngredient && hasAmount);
             }
-            updateAddButtonState();
-        }
-    });
-    
-    // Aktualizuj stan przycisku "Dodaj"
-    function updateAddButtonState() {
-        const hasIngredient = ingredientSelect.getValue() !== '';
-        const hasAmount = amountInput.value !== '' && parseFloat(amountInput.value) > 0;
-        addBtn.disabled = !(hasIngredient && hasAmount);
-    }
-    
-    // Aktualizuj widoczność komunikatu "brak składników"
-    function updateNoIngredientsMessage() {
-        const hasIngredients = ingredientsList.querySelectorAll('.ingredient-item').length > 0;
-        noIngredientsMsg.style.display = hasIngredients ? 'none' : 'block';
-    }
-    
-    amountInput.addEventListener('input', updateAddButtonState);
-    
-    // Dodaj wybrany składnik do listy
-    addBtn.addEventListener('click', function() {
-        const ingredientId = ingredientSelect.getValue();
-        const option = ingredientSelectEl.querySelector(`option[value="${ingredientId}"]`);
-        const ingredientName = option?.dataset?.name || '';
-        const amount = amountInput.value;
-        const unit = unitSelect.value;
-        
-        if (!ingredientId || !amount) return;
-        
-        // Sprawdź czy składnik już jest dodany
-        const existing = ingredientsList.querySelector(`input[name="ingredient_id"][value="${ingredientId}"]`);
-        if (existing) {
-            alert('Ten składnik jest już dodany do przepisu.');
-            return;
-        }
-        
-        // Utwórz element składnika
-        const item = document.createElement('div');
-        item.className = 'ingredient-item d-flex align-items-center gap-2 mb-2 p-2 bg-white rounded border';
-        item.innerHTML = `
+
+            // Aktualizuj widoczność komunikatu "brak składników"
+            function updateNoIngredientsMessage() {
+                const hasIngredients = ingredientsList.querySelectorAll('.ingredient-item').length > 0;
+                noIngredientsMsg.style.display = hasIngredients ? 'none' : 'block';
+            }
+
+            amountInput.addEventListener('input', updateAddButtonState);
+
+            // Dodaj wybrany składnik do listy
+            addBtn.addEventListener('click', function () {
+                const ingredientId = ingredientSelect.getValue();
+                const option = ingredientSelectEl.querySelector(`option[value="${ingredientId}"]`);
+                const ingredientName = option?.dataset?.name || '';
+                const amount = amountInput.value;
+                const unit = unitSelect.value;
+
+                if (!ingredientId || !amount) return;
+
+                // Sprawdź czy składnik już jest dodany
+                const existing = ingredientsList.querySelector(`input[name="ingredient_id"][value="${ingredientId}"]`);
+                if (existing) {
+                    alert('Ten składnik jest już dodany do przepisu.');
+                    return;
+                }
+
+                // Utwórz element składnika
+                const item = document.createElement('div');
+                item.className = 'ingredient-item d-flex align-items-center gap-2 mb-2 p-2 bg-white rounded border';
+                item.innerHTML = `
             <input type="hidden" name="ingredient_id" value="${ingredientId}">
             <input type="hidden" name="ingredient_amount" value="${amount}">
             <input type="hidden" name="ingredient_unit" value="${unit}">
@@ -327,112 +337,37 @@ document.addEventListener('DOMContentLoaded', function() {
             </span>
             <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient" title="Usuń">×</button>
         `;
-        
-        ingredientsList.appendChild(item);
-        updateNoIngredientsMessage();
-        
-        // Reset formularza w modalu
-        ingredientSelect.clear();
-        amountInput.value = '';
-        unitSelect.value = 'g';
-        updateAddButtonState();
-        
-        // Zamknij modal
-        bootstrap.Modal.getInstance(modal).hide();
-    });
-    
-    // Usuwanie składnika z listy
-    ingredientsList.addEventListener('click', function(e) {
-        const removeBtn = e.target.closest('.remove-ingredient');
-        if (removeBtn) {
-            removeBtn.closest('.ingredient-item').remove();
-            updateNoIngredientsMessage();
-        }
-    });
-    
-    // Przełączanie między wyborem a tworzeniem składnika
-    showNewFormBtn.addEventListener('click', function() {
-        selectSection.style.display = 'none';
-        newIngredientSection.style.display = 'block';
-        newIngredientNameInput.focus();
-    });
-    
-    backToSelectBtn.addEventListener('click', function() {
-        newIngredientSection.style.display = 'none';
-        selectSection.style.display = 'block';
-        newIngredientNameInput.value = '';
-        newIngredientCategoryInput.value = '';
-        document.getElementById('new-ingredient-calories').value = '';
-        document.getElementById('new-ingredient-protein').value = '';
-        document.getElementById('new-ingredient-carbs').value = '';
-        document.getElementById('new-ingredient-fat').value = '';
-        document.getElementById('new-ingredient-fiber').value = '';
-    });
-    
-    // Tworzenie nowego składnika przez AJAX
-    createNewBtn.addEventListener('click', function() {
-        const name = newIngredientNameInput.value.trim();
-        const category = newIngredientCategoryInput.value.trim();
-        
-        if (!name) {
-            alert('Podaj nazwę składnika.');
-            return;
-        }
-        
-        // Wyślij żądanie AJAX
-        const formData = new FormData();
-        formData.append('action', 'create_ingredient');
-        formData.append('name', name);
-        formData.append('category', category);
-        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-        
-        // Dodaj wartości odżywcze jeśli podano
-        const calories = document.getElementById('new-ingredient-calories').value;
-        const protein = document.getElementById('new-ingredient-protein').value;
-        const carbs = document.getElementById('new-ingredient-carbs').value;
-        const fat = document.getElementById('new-ingredient-fat').value;
-        const fiber = document.getElementById('new-ingredient-fiber').value;
-        
-        if (calories) formData.append('calories', calories);
-        if (protein) formData.append('protein', protein);
-        if (carbs) formData.append('carbohydrates', carbs);
-        if (fat) formData.append('fat', fat);
-        if (fiber) formData.append('fiber', fiber);
-        
-        fetch('{% url "recipes:index" %}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Dodaj nowy składnik do Tom Select
-                const displayText = data.name + (data.category ? ` (${data.category})` : '');
-                ingredientSelect.addOption({
-                    value: data.id,
-                    text: displayText,
-                    $option: {
-                        dataset: {
-                            name: data.name,
-                            unit: data.default_unit || 'g',
-                            category: data.category || ''
-                        }
-                    }
-                });
-                
-                // Dodaj też do natywnego selecta (dla renderowania)
-                const nativeOption = document.createElement('option');
-                nativeOption.value = data.id;
-                nativeOption.dataset.name = data.name;
-                nativeOption.dataset.unit = data.default_unit || 'g';
-                nativeOption.dataset.category = data.category || '';
-                nativeOption.textContent = displayText;
-                ingredientSelectEl.appendChild(nativeOption);
-                
-                // Wybierz nowo utworzony składnik
-                ingredientSelect.setValue(data.id);
-                
-                // Wróć do widoku wyboru i wyczyść formularz
+
+                ingredientsList.appendChild(item);
+                updateNoIngredientsMessage();
+
+                // Reset formularza w modalu
+                ingredientSelect.clear();
+                amountInput.value = '';
+                unitSelect.value = 'g';
+                updateAddButtonState();
+
+                // Zamknij modal
+                bootstrap.Modal.getInstance(modal).hide();
+            });
+
+            // Usuwanie składnika z listy
+            ingredientsList.addEventListener('click', function (e) {
+                const removeBtn = e.target.closest('.remove-ingredient');
+                if (removeBtn) {
+                    removeBtn.closest('.ingredient-item').remove();
+                    updateNoIngredientsMessage();
+                }
+            });
+
+            // Przełączanie między wyborem a tworzeniem składnika
+            showNewFormBtn.addEventListener('click', function () {
+                selectSection.style.display = 'none';
+                newIngredientSection.style.display = 'block';
+                newIngredientNameInput.focus();
+            });
+
+            backToSelectBtn.addEventListener('click', function () {
                 newIngredientSection.style.display = 'none';
                 selectSection.style.display = 'block';
                 newIngredientNameInput.value = '';
@@ -442,45 +377,120 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('new-ingredient-carbs').value = '';
                 document.getElementById('new-ingredient-fat').value = '';
                 document.getElementById('new-ingredient-fiber').value = '';
-                
+            });
+
+            // Tworzenie nowego składnika przez AJAX
+            createNewBtn.addEventListener('click', function () {
+                const name = newIngredientNameInput.value.trim();
+                const category = newIngredientCategoryInput.value.trim();
+
+                if (!name) {
+                    alert('Podaj nazwę składnika.');
+                    return;
+                }
+
+                // Wyślij żądanie AJAX
+                const formData = new FormData();
+                formData.append('action', 'create_ingredient');
+                formData.append('name', name);
+                formData.append('category', category);
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+                // Dodaj wartości odżywcze jeśli podano
+                const calories = document.getElementById('new-ingredient-calories').value;
+                const protein = document.getElementById('new-ingredient-protein').value;
+                const carbs = document.getElementById('new-ingredient-carbs').value;
+                const fat = document.getElementById('new-ingredient-fat').value;
+                const fiber = document.getElementById('new-ingredient-fiber').value;
+
+                if (calories) formData.append('calories', calories);
+                if (protein) formData.append('protein', protein);
+                if (carbs) formData.append('carbohydrates', carbs);
+                if (fat) formData.append('fat', fat);
+                if (fiber) formData.append('fiber', fiber);
+
+                fetch('{% url "recipes:index" %}', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Dodaj nowy składnik do Tom Select
+                            const displayText = data.name + (data.category ? ` (${data.category})` : '');
+                            ingredientSelect.addOption({
+                                value: data.id,
+                                text: displayText,
+                                $option: {
+                                    dataset: {
+                                        name: data.name,
+                                        unit: data.default_unit || 'g',
+                                        category: data.category || ''
+                                    }
+                                }
+                            });
+
+                            // Dodaj też do natywnego selecta (dla renderowania)
+                            const nativeOption = document.createElement('option');
+                            nativeOption.value = data.id;
+                            nativeOption.dataset.name = data.name;
+                            nativeOption.dataset.unit = data.default_unit || 'g';
+                            nativeOption.dataset.category = data.category || '';
+                            nativeOption.textContent = displayText;
+                            ingredientSelectEl.appendChild(nativeOption);
+
+                            // Wybierz nowo utworzony składnik
+                            ingredientSelect.setValue(data.id);
+
+                            // Wróć do widoku wyboru i wyczyść formularz
+                            newIngredientSection.style.display = 'none';
+                            selectSection.style.display = 'block';
+                            newIngredientNameInput.value = '';
+                            newIngredientCategoryInput.value = '';
+                            document.getElementById('new-ingredient-calories').value = '';
+                            document.getElementById('new-ingredient-protein').value = '';
+                            document.getElementById('new-ingredient-carbs').value = '';
+                            document.getElementById('new-ingredient-fat').value = '';
+                            document.getElementById('new-ingredient-fiber').value = '';
+
+                            updateAddButtonState();
+                            amountInput.focus();
+                        } else {
+                            alert(data.error || 'Wystąpił błąd podczas tworzenia składnika.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Wystąpił błąd podczas tworzenia składnika.');
+                    });
+            });
+
+            // Reset modalu po zamknięciu
+            modal.addEventListener('hidden.bs.modal', function () {
+                newIngredientSection.style.display = 'none';
+                selectSection.style.display = 'block';
+                ingredientSelect.clear();
+                amountInput.value = '';
+                unitSelect.value = 'g';
+                newIngredientNameInput.value = '';
+                newIngredientCategoryInput.value = '';
+                document.getElementById('new-ingredient-calories').value = '';
+                document.getElementById('new-ingredient-protein').value = '';
+                document.getElementById('new-ingredient-carbs').value = '';
+                document.getElementById('new-ingredient-fat').value = '';
+                document.getElementById('new-ingredient-fiber').value = '';
+                // Zwiń sekcję wartości odżywczych
+                const nutritionCollapse = document.getElementById('nutrition-fields');
+                if (nutritionCollapse.classList.contains('show')) {
+                    new bootstrap.Collapse(nutritionCollapse, { toggle: true });
+                }
                 updateAddButtonState();
-                amountInput.focus();
-            } else {
-                alert(data.error || 'Wystąpił błąd podczas tworzenia składnika.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Wystąpił błąd podczas tworzenia składnika.');
+            });
+
+            // Inicjalizacja
+            updateNoIngredientsMessage();
         });
-    });
-    
-    // Reset modalu po zamknięciu
-    modal.addEventListener('hidden.bs.modal', function() {
-        newIngredientSection.style.display = 'none';
-        selectSection.style.display = 'block';
-        ingredientSelect.clear();
-        amountInput.value = '';
-        unitSelect.value = 'g';
-        newIngredientNameInput.value = '';
-        newIngredientCategoryInput.value = '';
-        document.getElementById('new-ingredient-calories').value = '';
-        document.getElementById('new-ingredient-protein').value = '';
-        document.getElementById('new-ingredient-carbs').value = '';
-        document.getElementById('new-ingredient-fat').value = '';
-        document.getElementById('new-ingredient-fiber').value = '';
-        // Zwiń sekcję wartości odżywczych
-        const nutritionCollapse = document.getElementById('nutrition-fields');
-        if (nutritionCollapse.classList.contains('show')) {
-            new bootstrap.Collapse(nutritionCollapse, {toggle: true});
-        }
-        updateAddButtonState();
-    });
-    
-    // Inicjalizacja
-    updateNoIngredientsMessage();
-});
-</script>
+    </script>
 
     <div class="col-lg-7">
         <div class="card shadow-sm border-0 rounded-4">
@@ -488,24 +498,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2 class="h3 fw-bold mb-0">Lista przepisów</h2>
                     <div class="d-flex align-items-center gap-2">
-                        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <form class="d-flex" method="get" action="{% url 'recipes:index' %}">
+                            <div class="input-group input-group-sm">
+                                <input id="recipe-search" name="q" type="search" class="form-control"
+                                    placeholder="Szukaj przepisów..." value="{{ query|default:'' }}">
+                                <button class="btn btn-outline-secondary" type="submit">Szukaj</button>
+                            </div>
+                        </form>
+                        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#importModal">
                             📥 Importuj
                         </button>
-                        <span class="badge bg-light text-dark">{{ recipes|length }} pozycji</span>
+                        <span id="recipes-count" class="badge bg-light text-dark">{{ recipes|length }} pozycji</span>
                     </div>
                 </div>
 
                 {% if recipes %}
                 <div class="list-group">
                     {% for recipe in recipes %}
-                    <div class="list-group-item px-0 py-3 border-0 border-bottom">
+                    <div data-recipe-name="{{ recipe.name|lower }}"
+                        class="list-group-item px-0 py-3 border-0 border-bottom">
                         <div class="d-flex justify-content-between gap-3 align-items-start">
-                            {% if recipe.image %}
-                            <div class="flex-shrink-0">
-                                <img src="{{ recipe.image.url }}" alt="{{ recipe.name }}" 
-                                     class="rounded" style="width: 100px; height: 75px; object-fit: cover;">
-                            </div>
-                            {% endif %}
+
                             <div class="flex-grow-1">
                                 <h3 class="h6 fw-bold mb-1">{{ recipe.name }}</h3>
                                 <p class="text-muted small mb-2">{{ recipe.description|default:"Brak opisu" }}</p>
@@ -517,17 +531,19 @@ document.addEventListener('DOMContentLoaded', function() {
                                 {% if recipe.ingredients.all %}
                                 <div class="mt-2">
                                     <span class="fw-semibold small">Składniki:</span>
-                                    <span class="small text-muted">
+                                    <ul class="small mb-0 ps-3">
                                         {% for relation in recipe.ingredients.all %}
-                                        {% if not forloop.first %}, {% endif %}{{ relation.ingredient.name }}
+                                        <li class="text-muted"><strong>{{ relation.ingredient.name }}</strong> -
+                                            {{ relation.amount|floatformat:"-2" }} {{ relation.unit }}
+                                        </li>
                                         {% endfor %}
-                                    </span>
+                                    </ul>
                                 </div>
                                 {% endif %}
                                 {% if recipe.instructions %}
                                 <div class="mt-2">
-                                    <a class="fw-semibold small text-decoration-none" data-bs-toggle="collapse" 
-                                       href="#instructions-{{ recipe.pk }}" role="button" aria-expanded="false">
+                                    <a class="fw-semibold small text-decoration-none" data-bs-toggle="collapse"
+                                        href="#instructions-{{ recipe.pk }}" role="button" aria-expanded="false">
                                         📋 Pokaż kroki przygotowania
                                     </a>
                                     <div class="collapse mt-2" id="instructions-{{ recipe.pk }}">
@@ -547,8 +563,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 {% with nutrition=recipe.calculate_nutrition %}
                                 {% if nutrition.total.has_nutrition_data %}
                                 <div class="mt-2">
-                                    <a class="fw-semibold small text-decoration-none" data-bs-toggle="collapse" 
-                                       href="#nutrition-{{ recipe.pk }}" role="button" aria-expanded="false">
+                                    <a class="fw-semibold small text-decoration-none" data-bs-toggle="collapse"
+                                        href="#nutrition-{{ recipe.pk }}" role="button" aria-expanded="false">
                                         🥗 Pokaż wartości odżywcze
                                     </a>
                                     <div class="collapse mt-2" id="nutrition-{{ recipe.pk }}">
@@ -559,7 +575,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     <ul class="mb-2 ps-3">
                                                         <li>Kalorie: {{ nutrition.per_serving.calories }} kcal</li>
                                                         <li>Białko: {{ nutrition.per_serving.protein }} g</li>
-                                                        <li>Węglowodany: {{ nutrition.per_serving.carbohydrates }} g</li>
+                                                        <li>Węglowodany: {{ nutrition.per_serving.carbohydrates }} g
+                                                        </li>
                                                         <li>Tłuszcze: {{ nutrition.per_serving.fat }} g</li>
                                                         <li>Błonnik: {{ nutrition.per_serving.fiber }} g</li>
                                                     </ul>
@@ -577,7 +594,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                             </div>
                                             {% if nutrition.total.ingredients_without_data > 0 %}
                                             <div class="text-muted small mt-1">
-                                                ⚠️ {{ nutrition.total.ingredients_without_data }} składnik(ów) nie ma uzupełnionych wartości odżywczych
+                                                ⚠️ {{ nutrition.total.ingredients_without_data }} składnik(ów) nie ma
+                                                uzupełnionych wartości odżywczych
                                             </div>
                                             {% endif %}
                                         </div>
@@ -600,6 +618,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     {% endfor %}
                 </div>
+                <div id="no-recipes-search" class="text-muted" style="display:none;">Brak przepisów pasujących do
+                    zapytania.</div>
                 {% else %}
                 <div class="text-muted">Brak przepisów. Dodaj pierwszy przepis.</div>
                 {% endif %}
@@ -620,12 +640,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- Wybór źródła importu -->
                 <ul class="nav nav-tabs mb-3" id="importTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="url-tab" data-bs-toggle="tab" data-bs-target="#url-pane" type="button" role="tab">
+                        <button class="nav-link active" id="url-tab" data-bs-toggle="tab" data-bs-target="#url-pane"
+                            type="button" role="tab">
                             🌐 Z adresu URL
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="markdown-tab" data-bs-toggle="tab" data-bs-target="#markdown-pane" type="button" role="tab">
+                        <button class="nav-link" id="markdown-tab" data-bs-toggle="tab" data-bs-target="#markdown-pane"
+                            type="button" role="tab">
                             📝 Z Markdown
                         </button>
                     </li>
@@ -636,9 +658,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="tab-pane fade show active" id="url-pane" role="tabpanel">
                         <div class="mb-3">
                             <label class="form-label" for="import-url">Adres URL przepisu</label>
-                            <input type="url" class="form-control" id="import-url" placeholder="https://example.com/przepis-na-ciasto">
+                            <input type="url" class="form-control" id="import-url"
+                                placeholder="https://example.com/przepis-na-ciasto">
                             <div class="form-text">
-                                Wklej link do strony z przepisem. Obsługiwane są strony używające formatu schema.org/Recipe.
+                                Wklej link do strony z przepisem. Obsługiwane są strony używające formatu
+                                schema.org/Recipe.
                             </div>
                         </div>
                     </div>
@@ -664,8 +688,9 @@ Opis przepisu...
 ## Przygotowanie
 1. Krok pierwszy..."></textarea>
                             <div class="form-text">
-                                Wklej przepis w formacie Markdown. 
-                                <a href="#" data-bs-toggle="collapse" data-bs-target="#markdownHelp">Pokaż przykład formatu</a>
+                                Wklej przepis w formacie Markdown.
+                                <a href="#" data-bs-toggle="collapse" data-bs-target="#markdownHelp">Pokaż przykład
+                                    formatu</a>
                             </div>
                             <div class="collapse mt-2" id="markdownHelp">
                                 <div class="card card-body bg-light small">
@@ -696,12 +721,12 @@ Opis przepisu (opcjonalny)
                 <div id="import-preview" class="d-none">
                     <hr>
                     <h6 class="fw-bold">Podgląd przepisu</h6>
-                    
+
                     <div id="import-warnings" class="alert alert-warning d-none mb-3">
                         <strong>Ostrzeżenia:</strong>
                         <ul class="mb-0" id="import-warnings-list"></ul>
                     </div>
-                    
+
                     <div class="card bg-light">
                         <div class="card-body">
                             <h5 id="preview-name" class="card-title"></h5>
@@ -709,7 +734,8 @@ Opis przepisu (opcjonalny)
                             <div class="row g-2 mb-3 small">
                                 <div class="col-auto"><strong>Czas:</strong> <span id="preview-time"></span> min</div>
                                 <div class="col-auto"><strong>Porcje:</strong> <span id="preview-servings"></span></div>
-                                <div class="col-auto"><strong>Kategoria:</strong> <span id="preview-category"></span></div>
+                                <div class="col-auto"><strong>Kategoria:</strong> <span id="preview-category"></span>
+                                </div>
                             </div>
                             <div id="preview-source-url" class="mb-2 small d-none">
                                 <strong>Źródło:</strong> <a href="#" target="_blank" id="preview-source-link"></a>
@@ -747,188 +773,225 @@ Opis przepisu (opcjonalny)
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Import functionality
-    const importModal = document.getElementById('importModal');
-    const urlInput = document.getElementById('import-url');
-    const markdownInput = document.getElementById('import-markdown');
-    const previewBtn = document.getElementById('import-preview-btn');
-    const confirmBtn = document.getElementById('import-confirm-btn');
-    const previewDiv = document.getElementById('import-preview');
-    const errorDiv = document.getElementById('import-error');
-    const loadingDiv = document.getElementById('import-loading');
-    const warningsDiv = document.getElementById('import-warnings');
-    const warningsList = document.getElementById('import-warnings-list');
-    
-    let currentImportType = 'url';
-    let currentImportContent = '';
-    
-    // Nasłuchiwanie na zmianę zakładki
-    document.querySelectorAll('#importTabs button').forEach(btn => {
-        btn.addEventListener('shown.bs.tab', function(e) {
-            currentImportType = e.target.id === 'url-tab' ? 'url' : 'markdown';
-            resetImportState();
-        });
-    });
-    
-    function resetImportState() {
-        previewDiv.classList.add('d-none');
-        errorDiv.classList.add('d-none');
-        loadingDiv.classList.add('d-none');
-        warningsDiv.classList.add('d-none');
-        confirmBtn.classList.add('d-none');
-        previewBtn.classList.remove('d-none');
-    }
-    
-    function showError(message) {
-        errorDiv.textContent = message;
-        errorDiv.classList.remove('d-none');
-        loadingDiv.classList.add('d-none');
-    }
-    
-    function showPreview(data) {
-        loadingDiv.classList.add('d-none');
-        previewDiv.classList.remove('d-none');
-        previewBtn.classList.add('d-none');
-        confirmBtn.classList.remove('d-none');
-        
-        const recipe = data.recipe;
-        document.getElementById('preview-name').textContent = recipe.name;
-        document.getElementById('preview-description').textContent = recipe.description || 'Brak opisu';
-        document.getElementById('preview-time').textContent = recipe.preparation_time;
-        document.getElementById('preview-servings').textContent = recipe.servings;
-        document.getElementById('preview-category').textContent = recipe.category || '-';
-        
-        if (recipe.source_url) {
-            const sourceDiv = document.getElementById('preview-source-url');
-            const sourceLink = document.getElementById('preview-source-link');
-            sourceDiv.classList.remove('d-none');
-            sourceLink.href = recipe.source_url;
-            sourceLink.textContent = recipe.source_url;
-        } else {
-            document.getElementById('preview-source-url').classList.add('d-none');
-        }
-        
-        const ingredientsList = document.getElementById('preview-ingredients');
-        ingredientsList.innerHTML = '';
-        recipe.ingredients.forEach(ing => {
-            const li = document.createElement('li');
-            li.textContent = `${ing.amount} ${ing.unit} ${ing.name}`;
-            ingredientsList.appendChild(li);
-        });
-        
-        // Wyświetl kroki przygotowania
-        const instructionsSection = document.getElementById('preview-instructions-section');
-        const instructionsList = document.getElementById('preview-instructions');
-        instructionsList.innerHTML = '';
-        
-        if (recipe.instructions && recipe.instructions.trim()) {
-            instructionsSection.classList.remove('d-none');
-            const steps = recipe.instructions.split('\n').filter(step => step.trim());
-            steps.forEach(step => {
-                const li = document.createElement('li');
-                li.textContent = step.trim();
-                instructionsList.appendChild(li);
+    document.addEventListener('DOMContentLoaded', function () {
+        // Import functionality
+        const importModal = document.getElementById('importModal');
+        const urlInput = document.getElementById('import-url');
+        const markdownInput = document.getElementById('import-markdown');
+        const previewBtn = document.getElementById('import-preview-btn');
+        const confirmBtn = document.getElementById('import-confirm-btn');
+        const previewDiv = document.getElementById('import-preview');
+        const errorDiv = document.getElementById('import-error');
+        const loadingDiv = document.getElementById('import-loading');
+        const warningsDiv = document.getElementById('import-warnings');
+        const warningsList = document.getElementById('import-warnings-list');
+
+        let currentImportType = 'url';
+        let currentImportContent = '';
+
+        // Nasłuchiwanie na zmianę zakładki
+        document.querySelectorAll('#importTabs button').forEach(btn => {
+            btn.addEventListener('shown.bs.tab', function (e) {
+                currentImportType = e.target.id === 'url-tab' ? 'url' : 'markdown';
+                resetImportState();
             });
-        } else {
-            instructionsSection.classList.add('d-none');
-        }
-        
-        // Pokaż ostrzeżenia jeśli są
-        if (data.warnings && data.warnings.length > 0) {
-            warningsDiv.classList.remove('d-none');
-            warningsList.innerHTML = '';
-            data.warnings.forEach(w => {
-                const li = document.createElement('li');
-                li.textContent = w;
-                warningsList.appendChild(li);
-            });
-        } else {
+        });
+
+        function resetImportState() {
+            previewDiv.classList.add('d-none');
+            errorDiv.classList.add('d-none');
+            loadingDiv.classList.add('d-none');
             warningsDiv.classList.add('d-none');
+            confirmBtn.classList.add('d-none');
+            previewBtn.classList.remove('d-none');
         }
-    }
-    
-    // Podgląd przepisu
-    previewBtn.addEventListener('click', function() {
-        const content = currentImportType === 'url' ? urlInput.value.trim() : markdownInput.value.trim();
-        
-        if (!content) {
-            showError(currentImportType === 'url' ? 'Podaj adres URL przepisu' : 'Wklej treść przepisu w formacie Markdown');
-            return;
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('d-none');
+            loadingDiv.classList.add('d-none');
         }
-        
-        currentImportContent = content;
-        resetImportState();
-        loadingDiv.classList.remove('d-none');
-        
-        const formData = new FormData();
-        formData.append('type', currentImportType);
-        formData.append('content', content);
-        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-        
-        fetch('{% url "recipes:import_preview" %}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showPreview(data);
+
+        function showPreview(data) {
+            loadingDiv.classList.add('d-none');
+            previewDiv.classList.remove('d-none');
+            previewBtn.classList.add('d-none');
+            confirmBtn.classList.remove('d-none');
+
+            const recipe = data.recipe;
+            document.getElementById('preview-name').textContent = recipe.name;
+            document.getElementById('preview-description').textContent = recipe.description || 'Brak opisu';
+            document.getElementById('preview-time').textContent = recipe.preparation_time;
+            document.getElementById('preview-servings').textContent = recipe.servings;
+            document.getElementById('preview-category').textContent = recipe.category || '-';
+
+            if (recipe.source_url) {
+                const sourceDiv = document.getElementById('preview-source-url');
+                const sourceLink = document.getElementById('preview-source-link');
+                sourceDiv.classList.remove('d-none');
+                sourceLink.href = recipe.source_url;
+                sourceLink.textContent = recipe.source_url;
             } else {
-                showError(data.error);
+                document.getElementById('preview-source-url').classList.add('d-none');
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showError('Wystąpił błąd podczas pobierania przepisu');
+
+            const ingredientsList = document.getElementById('preview-ingredients');
+            ingredientsList.innerHTML = '';
+            recipe.ingredients.forEach(ing => {
+                const li = document.createElement('li');
+                li.textContent = `${ing.amount} ${ing.unit} ${ing.name}`;
+                ingredientsList.appendChild(li);
+            });
+
+            // Wyświetl kroki przygotowania
+            const instructionsSection = document.getElementById('preview-instructions-section');
+            const instructionsList = document.getElementById('preview-instructions');
+            instructionsList.innerHTML = '';
+
+            if (recipe.instructions && recipe.instructions.trim()) {
+                instructionsSection.classList.remove('d-none');
+                const steps = recipe.instructions.split('\n').filter(step => step.trim());
+                steps.forEach(step => {
+                    const li = document.createElement('li');
+                    li.textContent = step.trim();
+                    instructionsList.appendChild(li);
+                });
+            } else {
+                instructionsSection.classList.add('d-none');
+            }
+
+            // Pokaż ostrzeżenia jeśli są
+            if (data.warnings && data.warnings.length > 0) {
+                warningsDiv.classList.remove('d-none');
+                warningsList.innerHTML = '';
+                data.warnings.forEach(w => {
+                    const li = document.createElement('li');
+                    li.textContent = w;
+                    warningsList.appendChild(li);
+                });
+            } else {
+                warningsDiv.classList.add('d-none');
+            }
+        }
+
+        // Podgląd przepisu
+        previewBtn.addEventListener('click', function () {
+            const content = currentImportType === 'url' ? urlInput.value.trim() : markdownInput.value.trim();
+
+            if (!content) {
+                showError(currentImportType === 'url' ? 'Podaj adres URL przepisu' : 'Wklej treść przepisu w formacie Markdown');
+                return;
+            }
+
+            currentImportContent = content;
+            resetImportState();
+            loadingDiv.classList.remove('d-none');
+
+            const formData = new FormData();
+            formData.append('type', currentImportType);
+            formData.append('content', content);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+            fetch('{% url "recipes:import_preview" %}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showPreview(data);
+                    } else {
+                        showError(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Wystąpił błąd podczas pobierania przepisu');
+                });
+        });
+
+        // Potwierdzenie importu
+        confirmBtn.addEventListener('click', function () {
+            loadingDiv.classList.remove('d-none');
+            confirmBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('type', currentImportType);
+            formData.append('content', currentImportContent);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+            fetch('{% url "recipes:import_confirm" %}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    loadingDiv.classList.add('d-none');
+                    confirmBtn.disabled = false;
+
+                    if (data.success) {
+                        // Zamknij modal i odśwież stronę
+                        bootstrap.Modal.getInstance(importModal).hide();
+                        window.location.reload();
+                    } else {
+                        showError(data.error);
+                        previewDiv.classList.add('d-none');
+                        confirmBtn.classList.add('d-none');
+                        previewBtn.classList.remove('d-none');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loadingDiv.classList.add('d-none');
+                    confirmBtn.disabled = false;
+                    showError('Wystąpił błąd podczas importu przepisu');
+                });
+        });
+
+        // Reset po zamknięciu modala
+        importModal.addEventListener('hidden.bs.modal', function () {
+            urlInput.value = '';
+            markdownInput.value = '';
+            resetImportState();
+            currentImportContent = '';
         });
     });
-    
-    // Potwierdzenie importu
-    confirmBtn.addEventListener('click', function() {
-        loadingDiv.classList.remove('d-none');
-        confirmBtn.disabled = true;
-        
-        const formData = new FormData();
-        formData.append('type', currentImportType);
-        formData.append('content', currentImportContent);
-        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-        
-        fetch('{% url "recipes:import_confirm" %}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            loadingDiv.classList.add('d-none');
-            confirmBtn.disabled = false;
-            
-            if (data.success) {
-                // Zamknij modal i odśwież stronę
-                bootstrap.Modal.getInstance(importModal).hide();
-                window.location.reload();
-            } else {
-                showError(data.error);
-                previewDiv.classList.add('d-none');
-                confirmBtn.classList.add('d-none');
-                previewBtn.classList.remove('d-none');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            loadingDiv.classList.add('d-none');
-            confirmBtn.disabled = false;
-            showError('Wystąpił błąd podczas importu przepisu');
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('recipe-search');
+        if (!input) return;
+        const listItems = Array.from(document.querySelectorAll('.list-group .list-group-item'));
+        const countEl = document.getElementById('recipes-count');
+        const noResults = document.getElementById('no-recipes-search');
+
+        function updateCount(visible) {
+            if (!countEl) return;
+            countEl.textContent = visible + ' pozycji';
+        }
+
+        function filterOnce() {
+            const q = input.value.trim().toLowerCase();
+            let visible = 0;
+            listItems.forEach(item => {
+                const name = (item.dataset.recipeName || '').toLowerCase();
+                const match = q === '' || name.indexOf(q) !== -1;
+                item.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
+            updateCount(visible);
+        }
+
+        let timer = null;
+        input.addEventListener('input', function () {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(filterOnce, 150);
         });
+
+        // run once on load (in case query prefilled)
+        filterOnce();
     });
-    
-    // Reset po zamknięciu modala
-    importModal.addEventListener('hidden.bs.modal', function() {
-        urlInput.value = '';
-        markdownInput.value = '';
-        resetImportState();
-        currentImportContent = '';
-    });
-});
 </script>
 {% endblock %}

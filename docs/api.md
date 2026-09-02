@@ -49,9 +49,9 @@ Landing page z linkami do planowania i przepisów.
 ```python
 {
     "page_title": "Przepisy",
-    "recipes": QuerySet[Recipe],        # wszystkie przepisy z prefetch
-    "ingredients": QuerySet[Ingredient], # wszystkie składniki (select)
-    "editing_recipe": Recipe | None,     # przepis do edycji
+    "recipes": QuerySet[Recipe],  # wszystkie przepisy z prefetch
+    "ingredients": QuerySet[Ingredient],  # wszystkie składniki (select)
+    "editing_recipe": Recipe | None,  # przepis do edycji
 }
 ```
 
@@ -121,13 +121,13 @@ Landing page z linkami do planowania i przepisów.
     "page_title": "Planowanie",
     "planners": [
         {
-            "name": str,              # nazwa planu
+            "name": str,  # nazwa planu
             "rows": [MealPlan, ...],  # 7 dni posortowanych
-            "edit_mode": bool,        # czy w trybie edycji
+            "edit_mode": bool,  # czy w trybie edycji
         },
-        ...
+        ...,
     ],
-    "recipes": QuerySet[Recipe],      # wszystkie przepisy (select)
+    "recipes": QuerySet[Recipe],  # wszystkie przepisy (select)
 }
 ```
 
@@ -190,10 +190,10 @@ Landing page z linkami do planowania i przepisów.
 ```python
 {
     "page_title": "Lista zakupów",
-    "available_plans": QuerySet,     # dostępne plany
-    "selected_plan": str,            # wybrany plan
-    "shopping_list": list,           # zagregowana lista składników
-    "grouped_list": list,            # lista pogrupowana po kategoriach
+    "available_plans": QuerySet,  # dostępne plany
+    "selected_plan": str,  # wybrany plan
+    "shopping_list": list,  # zagregowana lista składników
+    "grouped_list": list,  # lista pogrupowana po kategoriach
 }
 ```
 
@@ -224,7 +224,7 @@ Konwertuje string na Decimal, obsługuje przecinek jako separator.
 
 ```python
 _parse_amount("2,5")  # Decimal("2.5")
-_parse_amount("")     # Decimal("0")
+_parse_amount("")  # Decimal(0)
 ```
 
 ### _add_recipe_ingredient(recipe, ...)

@@ -10,7 +10,6 @@ class Recipe(models.Model):
     preparation_time = models.PositiveIntegerField(default=0, help_text="Czas przygotowania w minutach")
     servings = models.PositiveIntegerField(default=1)
     category = models.CharField(max_length=100, blank=True)
-    image = models.ImageField(upload_to="recipes/", blank=True, null=True)
 
     class Meta:
         ordering = ["name"]
@@ -41,11 +40,11 @@ class Recipe(models.Model):
         }
 
         totals = {
-            "calories": Decimal("0"),
-            "protein": Decimal("0"),
-            "carbohydrates": Decimal("0"),
-            "fat": Decimal("0"),
-            "fiber": Decimal("0"),
+            "calories": Decimal(0),
+            "protein": Decimal(0),
+            "carbohydrates": Decimal(0),
+            "fat": Decimal(0),
+            "fiber": Decimal(0),
             "has_nutrition_data": False,
             "ingredients_with_data": 0,
             "ingredients_without_data": 0,

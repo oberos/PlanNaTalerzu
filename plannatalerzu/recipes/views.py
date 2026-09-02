@@ -24,12 +24,12 @@ def _parse_new_ingredients(raw_value):
 
 def _parse_amount(raw_value):
     if raw_value in (None, ""):
-        return Decimal("0")
+        return Decimal(0)
 
     try:
         return Decimal(str(raw_value).replace(",", "."))
     except InvalidOperation:
-        return Decimal("0")
+        return Decimal(0)
 
 
 def _add_recipe_ingredient(recipe, ingredient=None, ingredient_name=None, ingredient_id=None, amount="", unit=""):
@@ -92,7 +92,12 @@ def _add_recipe_ingredients_from_post(recipe, request):
 
 
 def recipe_index(request):
-    recipes = Recipe.objects.prefetch_related("ingredients__ingredient").all()
+    # Allow optional search via ?q=...
+    query = request.GET.get("q", "").strip()
+    recipes_qs = Recipe.objects.prefetch_related("ingredients__ingredient").all()
+
+    if query:
+        recipes_qs = recipes_qs.filter(name__icontains=query)
     ingredients = Ingredient.objects.order_by("name").all()
     editing_recipe = None
 
@@ -133,11 +138,11 @@ def recipe_index(request):
             if any([calories, protein, carbohydrates, fat, fiber]):
                 NutritionInfo.objects.create(
                     ingredient=ingredient,
-                    calories=Decimal(calories) if calories else Decimal("0"),
-                    protein=Decimal(protein) if protein else Decimal("0"),
-                    carbohydrates=Decimal(carbohydrates) if carbohydrates else Decimal("0"),
-                    fat=Decimal(fat) if fat else Decimal("0"),
-                    fiber=Decimal(fiber) if fiber else Decimal("0"),
+                    calories=Decimal(calories) if calories else Decimal(0),
+                    protein=Decimal(protein) if protein else Decimal(0),
+                    carbohydrates=Decimal(carbohydrates) if carbohydrates else Decimal(0),
+                    fat=Decimal(fat) if fat else Decimal(0),
+                    fiber=Decimal(fiber) if fiber else Decimal(0),
                 )
 
             return JsonResponse(
@@ -152,9 +157,6 @@ def recipe_index(request):
 
         if action == "delete":
             recipe = get_object_or_404(Recipe, pk=request.POST.get("recipe_id"))
-            # Usuń plik obrazu jeśli istnieje
-            if recipe.image:
-                recipe.image.delete(save=False)
             recipe.delete()
             return redirect("recipes:index")
 
@@ -183,30 +185,6 @@ def recipe_index(request):
                 recipe = None
 
             if recipe is not None:
-                # Obsługa obrazu
-                if "image" in request.FILES:
-                    image = request.FILES["image"]
-                    # Walidacja formatu
-                    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
-                    if image.content_type not in allowed_types:
-                        pass  # Ignoruj nieprawidłowy format
-                    # Walidacja rozmiaru (max 5MB)
-                    elif image.size > 5 * 1024 * 1024:
-                        pass  # Ignoruj za duży plik
-                    else:
-                        # Usuń stary obraz jeśli istnieje
-                        if recipe.image:
-                            recipe.image.delete(save=False)
-                        recipe.image = image
-                        recipe.save(update_fields=["image"])
-
-                # Usuwanie obrazu
-                if request.POST.get("image_clear"):
-                    if recipe.image:
-                        recipe.image.delete(save=False)
-                    recipe.image = None
-                    recipe.save(update_fields=["image"])
-
                 _add_recipe_ingredients_from_post(recipe, request)
 
         return redirect("recipes:index")
@@ -220,9 +198,10 @@ def recipe_index(request):
         "recipes/index.html",
         {
             "page_title": "Przepisy",
-            "recipes": recipes,
+            "recipes": recipes_qs,
             "ingredients": ingredients,
             "editing_recipe": editing_recipe,
+            "query": query,
         },
     )
 
@@ -412,11 +391,11 @@ def _update_nutrition_from_post(ingredient, request):
     # Jeśli podano jakiekolwiek wartości, utwórz/zaktualizuj NutritionInfo
     if any([calories, protein, carbohydrates, fat, fiber]):
         nutrition, _ = NutritionInfo.objects.get_or_create(ingredient=ingredient)
-        nutrition.calories = Decimal(calories) if calories else Decimal("0")
-        nutrition.protein = Decimal(protein) if protein else Decimal("0")
-        nutrition.carbohydrates = Decimal(carbohydrates) if carbohydrates else Decimal("0")
-        nutrition.fat = Decimal(fat) if fat else Decimal("0")
-        nutrition.fiber = Decimal(fiber) if fiber else Decimal("0")
+        nutrition.calories = Decimal(calories) if calories else Decimal(0)
+        nutrition.protein = Decimal(protein) if protein else Decimal(0)
+        nutrition.carbohydrates = Decimal(carbohydrates) if carbohydrates else Decimal(0)
+        nutrition.fat = Decimal(fat) if fat else Decimal(0)
+        nutrition.fiber = Decimal(fiber) if fiber else Decimal(0)
         nutrition.save()
     else:
         # Jeśli wszystkie wartości są puste, usuń NutritionInfo jeśli istnieje
