@@ -21,19 +21,19 @@
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/planner/' %}active{% endif %}"
+                        <a class="nav-link {% if request.resolver_match and request.resolver_match.app_name == 'planner' %}active{% endif %}"
                             href="{% url 'planner:index' %}">Planowanie</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/recipes/' %}active{% endif %}"
+                        <a class="nav-link {% if request.resolver_match and request.resolver_match.app_name == 'recipes' %}active{% endif %}"
                             href="{% url 'recipes:index' %}">Przepisy</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/recipes/ingredients/' %}active{% endif %}"
+                        <a class="nav-link {% if request.resolver_match and request.resolver_match.app_name == 'recipes' and request.resolver_match.url_name == 'ingredients' %}active{% endif %}"
                             href="{% url 'recipes:ingredients' %}">Składniki</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/shopping/' %}active{% endif %}"
+                        <a class="nav-link {% if request.resolver_match and request.resolver_match.app_name == 'shopping' %}active{% endif %}"
                             href="{% url 'shopping:index' %}">Lista zakupów</a>
                     </li>
                 </ul>
@@ -41,9 +41,30 @@
         </div>
     </nav>
 
+    {# messages area #}
+    <div class="container mt-3">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zamknij"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
     <main class="container py-5">
         {% block content %}{% endblock %}
     </main>
+
+    <footer class="bg-white border-top py-3">
+        <div class="container">
+            <div class="d-flex justify-content-between small text-muted">
+                <div>© PlanNaTalerzu {% now "Y" %}</div>
+                <div>Made with ♥</div>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
