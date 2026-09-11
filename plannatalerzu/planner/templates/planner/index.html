@@ -3,25 +3,19 @@
 {% block title %}Planowanie{% endblock %}
 
 {% block content %}
-<div class="card shadow-sm border-0 rounded-4 mb-4">
-    <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h2 fw-bold mb-1">Planowanie posiłków</h1>
-                <p class="text-muted mb-0">Twórz i zarządzaj planami na cały tydzień.</p>
-            </div>
-        </div>
-
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold mb-1">Planowanie posiłków</h1>
+        <p class="text-muted mb-0">Twórz i zarządzaj planami na cały tydzień.</p>
+    </div>
+    <div>
         <form method="post" class="row gy-2 gx-3 align-items-end">
             {% csrf_token %}
             <input type="hidden" name="action" value="create">
-            <div class="col-md-5">
-                <label for="planner-name" class="form-label">Nazwa nowego planu</label>
-                <input id="planner-name" name="name" type="text" class="form-control" placeholder="Podaj nazwę planu"
-                    required>
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary mt-4">Dodaj nowy planner</button>
+            <div class="d-flex">
+                <input id="planner-name" name="name" type="text" class="form-control me-2"
+                    placeholder="Nazwa nowego planu" required>
+                <button type="submit" class="btn btn-primary">Dodaj plan</button>
             </div>
         </form>
     </div>
@@ -30,17 +24,9 @@
 {% for planner in planners %}
 <div class="card shadow-sm border-0 rounded-4 mb-4">
     <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="h5 fw-bold mb-0">{{ planner.name }}</h2>
             <div class="d-flex gap-2">
-                {% if planner.edit_mode %}
-                <a href="{% url 'planner:index' %}" class="btn btn-outline-secondary btn-sm">Anuluj</a>
-                <button type="submit" form="planner-form-{{ planner.name|slugify }}"
-                    class="btn btn-primary btn-sm">Zapisz plan</button>
-                {% else %}
-                <a href="{% url 'planner:index' %}?edit_plan={{ planner.name|urlencode }}"
-                    class="btn btn-outline-primary btn-sm">Edytuj plan</a>
-                {% endif %}
                 <form method="post" class="mb-0">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete">
@@ -50,254 +36,788 @@
             </div>
         </div>
 
-        {% if planner.edit_mode %}
         <form method="post" id="planner-form-{{ planner.name|slugify }}">
             {% csrf_token %}
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="planner_name" value="{{ planner.name }}">
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col">Dzień</th>
-                            <th scope="col">Obiad</th>
-                            <th scope="col">Kolacja</th>
-                            <th scope="col">Alternatywa</th>
-                            <th scope="col" class="text-center" style="min-width: 120px;">Kalorie (kcal)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in planner.rows %}
-                        <tr>
-                            <td class="fw-semibold">{{ row.get_day_of_week_display }}</td>
-                            <td>
-                                <select name="recipe_dinner_{{ row.pk }}" class="form-select form-select-sm">
-                                    <option value="">-- brak --</option>
-                                    {% for recipe in recipes %}
-                                    <option value="{{ recipe.pk }}" {% if row.recipe_dinner_id == recipe.pk %}selected{% endif %}>{{ recipe.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </td>
-                            <td>
-                                <select name="recipe_supper_{{ row.pk }}" class="form-select form-select-sm">
-                                    <option value="">-- brak --</option>
-                                    {% for recipe in recipes %}
-                                    <option value="{{ recipe.pk }}" {% if row.recipe_supper_id == recipe.pk %}selected{% endif %}>{{ recipe.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </td>
-                            <td>
-                                <select name="recipe_dinner_alternative_{{ row.pk }}"
-                                    class="form-select form-select-sm">
-                                    <option value="">-- brak --</option>
-                                    {% for recipe in recipes %}
-                                    <option value="{{ recipe.pk }}" {% if row.recipe_dinner_alternative_id == recipe.pk %}selected{% endif %}>{{ recipe.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </td>
-                            <td class="text-center small">
-                                {% if row.calories_main > 0 or row.calories_alt > 0 %}
-                                <span title="Obiad + Kolacja">{{ row.calories_main|floatformat:0 }}</span>
-                                {% if row.calories_alt > 0 and row.calories_alt != row.calories_main %}
-                                <span class="text-muted"> | </span>
-                                <span class="text-secondary" title="Alternatywa + Kolacja">{{ row.calories_alt|floatformat:0 }}</span>
-                                {% endif %}
-                                {% else %}
-                                <span class="text-muted">—</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+
+            <ul class="nav nav-pills mb-3" role="tablist" id="planner-tabs-{{ planner.name|slugify }}">
+                {% for row in planner.rows %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-{{ planner.name|slugify }}-{{ forloop.counter0 }}"
+                        data-day="{{ row.day_of_week }}" data-bs-toggle="pill"
+                        data-bs-target="#pane-{{ planner.name|slugify }}-{{ forloop.counter0 }}" type="button"
+                        role="tab" aria-controls="pane-{{ planner.name|slugify }}-{{ forloop.counter0 }}"
+                        aria-selected="false">{{ row.get_day_of_week_display }}</button>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="tab-content">
+                {% for row in planner.rows %}
+                <div class="tab-pane fade" id="pane-{{ planner.name|slugify }}-{{ forloop.counter0 }}" role="tabpanel" aria-labelledby="tab-{{ planner.name|slugify }}-{{ forloop.counter0 }}">
+                    <div class="d-grid gap-3">
+                        <div>
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-semibold d-flex justify-content-between align-items-center"><span>Śniadanie</span><small class="text-muted" id="totals-{{ planner.name|slugify }}-{{ row.pk }}-breakfast">{% if row.totals_by_meal.breakfast.calories %}{{ row.totals_by_meal.breakfast.calories }} kcal | B: {{ row.totals_by_meal.breakfast.protein }} | W: {{ row.totals_by_meal.breakfast.carbohydrates }} | T: {{ row.totals_by_meal.breakfast.fat }}{% endif %}</small></h6>
+                                    {% if planner.edit_mode %}
+                                    <select name="recipe_breakfast_{{ row.pk }}" class="form-select mb-2">
+                                        <option value="">-- brak --</option>
+                                        {% for recipe in recipes %}
+                                        <option value="{{ recipe.pk }}" {% if row.recipe_breakfast_id == recipe.pk %}selected{% endif %}>{{ recipe.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% else %}
+                                    {% if row.recipe_breakfast %}
+                                    <button type="button" class="btn btn-link p-0 recipe-trigger" data-recipe-name="{{ row.recipe_breakfast.name|escape }}" data-recipe-description="{{ row.recipe_breakfast.description|default:'Brak opisu'|escape }}" data-preparation-time="{{ row.recipe_breakfast.preparation_time }}" data-servings="{{ row.recipe_breakfast.servings }}" data-category="{{ row.recipe_breakfast.category|default:'Brak kategorii'|escape }}" data-recipe-ingredients='[{% for ing in row.recipe_breakfast.ingredients.all %}{"name": "{{ ing.ingredient.name|escapejs }}", "amount": "{{ ing.amount }}", "unit": "{{ ing.unit|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}]' data-recipe-instructions="{{ row.recipe_breakfast.instructions|escape }}">{{ row.recipe_breakfast.name }}</button>
+                                    {% else %}
+                                    {% endif %}
+                                    {% endif %}
+
+                                    <div class="mt-3">
+                                        <div class="meal-items" data-planner-slug="{{ planner.name|slugify }}" data-row="{{ row.pk }}" data-meal="breakfast" id="items-{{ planner.name|slugify }}-{{ row.pk }}-breakfast">
+                                            {% for it in row.items_by_meal.breakfast %}
+                                            <div class="d-flex justify-content-between align-items-center mb-1 item-entry-row" data-type="{{ it.type }}" data-item-id="{{ it.pk }}" data-calories="{{ it.nutrition.calories|default:0 }}" data-protein="{{ it.nutrition.protein|default:0 }}" data-carbohydrates="{{ it.nutrition.carbohydrates|default:0 }}" data-fat="{{ it.nutrition.fat|default:0 }}">
+                                                <div class="flex-grow-1">
+                                                    {% if it.type == 'recipe' and it.recipe %}{{ it.recipe.name }}{% else %}{{ it.ingredient_name }}{% if it.ingredient_amount %} — {{ it.ingredient_amount }}{% if it.ingredient_unit %} {{ it.ingredient_unit }}{% endif %}{% endif %}{% endif %}
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="text-muted small text-end ms-2 me-2">
+                                                        {% if it.nutrition %}
+                                                            {% if it.nutrition.calories or it.nutrition.protein or it.nutrition.carbohydrates or it.nutrition.fat %}
+                                                                {{ it.nutrition.calories }} kcal | B: {{ it.nutrition.protein }} | W: {{ it.nutrition.carbohydrates }} | T: {{ it.nutrition.fat }}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-link text-danger remove-item-btn" data-item-id="{{ it.pk }}" aria-label="Usuń">×</button>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-2 add-item-btn" data-planner="{{ planner.name|slugify }}" data-row="{{ row.pk }}" data-meal="breakfast" data-bs-toggle="modal" data-bs-target="#chooseItemModal">+ Dodaj</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-semibold d-flex justify-content-between align-items-center"><span>II Śniadanie</span><small class="text-muted" id="totals-{{ planner.name|slugify }}-{{ row.pk }}-second_breakfast">{% if row.totals_by_meal.second_breakfast.calories %}{{ row.totals_by_meal.second_breakfast.calories }} kcal | B: {{ row.totals_by_meal.second_breakfast.protein }} | W: {{ row.totals_by_meal.second_breakfast.carbohydrates }} | T: {{ row.totals_by_meal.second_breakfast.fat }}{% endif %}</small></h6>
+                                    {% if planner.edit_mode %}
+                                    <select name="recipe_second_breakfast_{{ row.pk }}" class="form-select mb-2">
+                                        <option value="">-- brak --</option>
+                                        {% for recipe in recipes %}
+                                        <option value="{{ recipe.pk }}" {% if row.recipe_second_breakfast_id == recipe.pk %}selected{% endif %}>{{ recipe.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% else %}
+                                    {% if row.recipe_second_breakfast %}
+                                    <button type="button" class="btn btn-link p-0 recipe-trigger" data-recipe-name="{{ row.recipe_second_breakfast.name|escape }}" data-recipe-description="{{ row.recipe_second_breakfast.description|default:'Brak opisu'|escape }}" data-preparation-time="{{ row.recipe_second_breakfast.preparation_time }}" data-servings="{{ row.recipe_second_breakfast.servings }}" data-category="{{ row.recipe_second_breakfast.category|default:'Brak kategorii'|escape }}" data-recipe-ingredients='[{% for ing in row.recipe_second_breakfast.ingredients.all %}{"name": "{{ ing.ingredient.name|escapejs }}", "amount": "{{ ing.amount }}", "unit": "{{ ing.unit|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}]' data-recipe-instructions="{{ row.recipe_second_breakfast.instructions|escape }}">{{ row.recipe_second_breakfast.name }}</button>
+                                    {% else %}
+                                    {% endif %}
+                                    {% endif %}
+
+                                    <div class="mt-3">
+                                        <div class="meal-items" data-planner-slug="{{ planner.name|slugify }}" data-row="{{ row.pk }}" data-meal="second_breakfast" id="items-{{ planner.name|slugify }}-{{ row.pk }}-second_breakfast">
+                                            {% for it in row.items_by_meal.second_breakfast %}
+                                            <div class="d-flex justify-content-between align-items-center mb-1 item-entry-row" data-type="{{ it.type }}" data-item-id="{{ it.pk }}" data-calories="{{ it.nutrition.calories|default:0 }}" data-protein="{{ it.nutrition.protein|default:0 }}" data-carbohydrates="{{ it.nutrition.carbohydrates|default:0 }}" data-fat="{{ it.nutrition.fat|default:0 }}">
+                                                <div class="flex-grow-1">
+                                                    {% if it.type == 'recipe' and it.recipe %}{{ it.recipe.name }}{% else %}{{ it.ingredient_name }}{% if it.ingredient_amount %} — {{ it.ingredient_amount }}{% if it.ingredient_unit %} {{ it.ingredient_unit }}{% endif %}{% endif %}{% endif %}
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="text-muted small text-end ms-2 me-2">
+                                                        {% if it.nutrition %}
+                                                            {% if it.nutrition.calories or it.nutrition.protein or it.nutrition.carbohydrates or it.nutrition.fat %}
+                                                                {{ it.nutrition.calories }} kcal | B: {{ it.nutrition.protein }} | W: {{ it.nutrition.carbohydrates }} | T: {{ it.nutrition.fat }}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-link text-danger remove-item-btn" data-item-id="{{ it.pk }}" aria-label="Usuń">×</button>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-2 add-item-btn" data-planner="{{ planner.name|slugify }}" data-row="{{ row.pk }}" data-meal="second_breakfast" data-bs-toggle="modal" data-bs-target="#chooseItemModal">+ Dodaj</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-semibold d-flex justify-content-between align-items-center"><span>Obiad</span><small class="text-muted" id="totals-{{ planner.name|slugify }}-{{ row.pk }}-alternative">{% if row.totals_by_meal.alternative.calories %}{{ row.totals_by_meal.alternative.calories }} kcal | B: {{ row.totals_by_meal.alternative.protein }} | W: {{ row.totals_by_meal.alternative.carbohydrates }} | T: {{ row.totals_by_meal.alternative.fat }}{% endif %}</small></h6>
+                                    {% if planner.edit_mode %}
+                                    <select name="recipe_dinner_alternative_{{ row.pk }}" class="form-select">
+                                        <option value="">-- brak --</option>
+                                        {% for recipe in recipes %}
+                                        <option value="{{ recipe.pk }}" {% if row.recipe_dinner_alternative_id == recipe.pk %}selected{% endif %}>{{ recipe.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% else %}
+                                    {% if row.recipe_dinner_alternative %}
+                                    <button type="button" class="btn btn-link p-0 recipe-trigger" data-recipe-name="{{ row.recipe_dinner_alternative.name|escape }}" data-recipe-description="{{ row.recipe_dinner_alternative.description|default:'Brak opisu'|escape }}" data-preparation-time="{{ row.recipe_dinner_alternative.preparation_time }}" data-servings="{{ row.recipe_dinner_alternative.servings }}" data-category="{{ row.recipe_dinner_alternative.category|default:'Brak kategorii'|escape }}" data-recipe-ingredients='[{% for ing in row.recipe_dinner_alternative.ingredients.all %}{"name": "{{ ing.ingredient.name|escapejs }}", "amount": "{{ ing.amount }}", "unit": "{{ ing.unit|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}]' data-recipe-instructions="{{ row.recipe_dinner_alternative.instructions|escape }}">{{ row.recipe_dinner_alternative.name }}</button>
+                                    {% else %}
+                                    {% endif %}
+                                    {% endif %}
+
+                                    <div class="mt-3">
+                                        <div class="meal-items" data-planner-slug="{{ planner.name|slugify }}" data-row="{{ row.pk }}" data-meal="alternative" id="items-{{ planner.name|slugify }}-{{ row.pk }}-alternative">
+                                            {% for it in row.items_by_meal.alternative %}
+                                            <div class="d-flex justify-content-between align-items-center mb-1 item-entry-row" data-type="{{ it.type }}" data-item-id="{{ it.pk }}" data-calories="{{ it.nutrition.calories|default:0 }}" data-protein="{{ it.nutrition.protein|default:0 }}" data-carbohydrates="{{ it.nutrition.carbohydrates|default:0 }}" data-fat="{{ it.nutrition.fat|default:0 }}">
+                                                <div class="flex-grow-1">
+                                                    {% if it.type == 'recipe' and it.recipe %}{{ it.recipe.name }}{% else %}{{ it.ingredient_name }}{% if it.ingredient_amount %} — {{ it.ingredient_amount }}{% if it.ingredient_unit %} {{ it.ingredient_unit }}{% endif %}{% endif %}{% endif %}
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="text-muted small text-end ms-2 me-2">
+                                                        {% if it.nutrition %}
+                                                            {% if it.nutrition.calories or it.nutrition.protein or it.nutrition.carbohydrates or it.nutrition.fat %}
+                                                                {{ it.nutrition.calories }} kcal | B: {{ it.nutrition.protein }} | W: {{ it.nutrition.carbohydrates }} | T: {{ it.nutrition.fat }}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-link text-danger remove-item-btn" data-item-id="{{ it.pk }}" aria-label="Usuń">×</button>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-2 add-item-btn" data-planner="{{ planner.name|slugify }}" data-row="{{ row.pk }}" data-meal="alternative" data-bs-toggle="modal" data-bs-target="#chooseItemModal">+ Dodaj</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="fw-semibold d-flex justify-content-between align-items-center"><span>Kolacja</span><small class="text-muted" id="totals-{{ planner.name|slugify }}-{{ row.pk }}-supper">{% if row.totals_by_meal.supper.calories %}{{ row.totals_by_meal.supper.calories }} kcal | B: {{ row.totals_by_meal.supper.protein }} | W: {{ row.totals_by_meal.supper.carbohydrates }} | T: {{ row.totals_by_meal.supper.fat }}{% endif %}</small></h6>
+                                    {% if planner.edit_mode %}
+                                    <select name="recipe_supper_{{ row.pk }}" class="form-select">
+                                        <option value="">-- brak --</option>
+                                        {% for recipe in recipes %}
+                                        <option value="{{ recipe.pk }}" {% if row.recipe_supper_id == recipe.pk %}selected{% endif %}>{{ recipe.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% else %}
+                                    {% if row.recipe_supper %}
+                                    <button type="button" class="btn btn-link p-0 recipe-trigger" data-recipe-name="{{ row.recipe_supper.name|escape }}" data-recipe-description="{{ row.recipe_supper.description|default:'Brak opisu'|escape }}" data-preparation-time="{{ row.recipe_supper.preparation_time }}" data-servings="{{ row.recipe_supper.servings }}" data-category="{{ row.recipe_supper.category|default:'Brak kategorii'|escape }}" data-recipe-ingredients='[{% for ing in row.recipe_supper.ingredients.all %}{"name": "{{ ing.ingredient.name|escapejs }}", "amount": "{{ ing.amount }}", "unit": "{{ ing.unit|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}]' data-recipe-instructions="{{ row.recipe_supper.instructions|escape }}">{{ row.recipe_supper.name }}</button>
+                                    {% else %}
+                                    {% endif %}
+                                    {% endif %}
+
+                                    <div class="mt-3">
+                                        <div class="meal-items" data-planner-slug="{{ planner.name|slugify }}" data-row="{{ row.pk }}" data-meal="supper" id="items-{{ planner.name|slugify }}-{{ row.pk }}-supper">
+                                            {% for it in row.items_by_meal.supper %}
+                                            <div class="d-flex justify-content-between align-items-center mb-1 item-entry-row" data-type="{{ it.type }}" data-item-id="{{ it.pk }}" data-calories="{{ it.nutrition.calories|default:0 }}" data-protein="{{ it.nutrition.protein|default:0 }}" data-carbohydrates="{{ it.nutrition.carbohydrates|default:0 }}" data-fat="{{ it.nutrition.fat|default:0 }}">
+                                                <div class="flex-grow-1">
+                                                    {% if it.type == 'recipe' and it.recipe %}{{ it.recipe.name }}{% else %}{{ it.ingredient_name }}{% if it.ingredient_amount %} — {{ it.ingredient_amount }}{% if it.ingredient_unit %} {{ it.ingredient_unit }}{% endif %}{% endif %}{% endif %}
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="text-muted small text-end ms-2 me-2">
+                                                        {% if it.nutrition %}
+                                                            {% if it.nutrition.calories or it.nutrition.protein or it.nutrition.carbohydrates or it.nutrition.fat %}
+                                                                {{ it.nutrition.calories }} kcal | B: {{ it.nutrition.protein }} | W: {{ it.nutrition.carbohydrates }} | T: {{ it.nutrition.fat }}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-link text-danger remove-item-btn" data-item-id="{{ it.pk }}" aria-label="Usuń">×</button>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary mt-2 add-item-btn" data-planner="{{ planner.name|slugify }}" data-row="{{ row.pk }}" data-meal="supper" data-bs-toggle="modal" data-bs-target="#chooseItemModal">+ Dodaj</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted">Kalorie (dzień):</small>
+                            <strong class="ms-2" id="daycal-{{ planner.name|slugify }}-{{ row.pk }}">{% if row.calories_day and row.calories_day > 0 %}{{ row.calories_day|floatformat:0 }}{% else %}—{% endif %}</strong>
+                        </div>
+                        <div>
+                            <small class="text-muted">Makro (g, dzień):</small>
+                            <span class="ms-2" id="daymacro-{{ planner.name|slugify }}-{{ row.pk }}">B: {{ row.protein_day }} | W: {{ row.carbs_day }} | T: {{ row.fat_day }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-        </form>
-        {% else %}
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">Dzień</th>
-                        <th scope="col">Obiad</th>
-                        <th scope="col">Kolacja</th>
-                        <th scope="col">Alternatywa</th>
-                        <th scope="col" class="text-center" style="min-width: 120px;">Kalorie (kcal)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in planner.rows %}
-                    <tr>
-                        <td class="fw-semibold">{{ row.get_day_of_week_display }}</td>
-                        <td>
-                            {% if row.recipe_dinner %}
-                            <button type="button" class="btn btn-link p-0 text-start recipe-trigger"
-                                data-recipe-name="{{ row.recipe_dinner.name|escape }}"
-                                data-recipe-description="{{ row.recipe_dinner.description|default:'Brak opisu'|escape }}"
-                                data-preparation-time="{{ row.recipe_dinner.preparation_time }}"
-                                data-servings="{{ row.recipe_dinner.servings }}"
-                                data-category="{{ row.recipe_dinner.category|default:'Brak kategorii'|escape }}"
-                                data-recipe-ingredients='[{% for ing in row.recipe_dinner.ingredients.all %}{"name": "{{ ing.ingredient.name|escapejs }}", "amount": "{{ ing.amount }}", "unit": "{{ ing.unit|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}]'
-                                data-recipe-instructions="{{ row.recipe_dinner.instructions|escape }}">
-                                {{ row.recipe_dinner.name }}
-                            </button>
-                            {% else %}
-                            <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if row.recipe_supper %}
-                            <button type="button" class="btn btn-link p-0 text-start recipe-trigger"
-                                data-recipe-name="{{ row.recipe_supper.name|escape }}"
-                                data-recipe-description="{{ row.recipe_supper.description|default:'Brak opisu'|escape }}"
-                                data-preparation-time="{{ row.recipe_supper.preparation_time }}"
-                                data-servings="{{ row.recipe_supper.servings }}"
-                                data-category="{{ row.recipe_supper.category|default:'Brak kategorii'|escape }}"
-                                data-recipe-ingredients='[{% for ing in row.recipe_supper.ingredients.all %}{"name": "{{ ing.ingredient.name|escapejs }}", "amount": "{{ ing.amount }}", "unit": "{{ ing.unit|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}]'
-                                data-recipe-instructions="{{ row.recipe_supper.instructions|escape }}">
-                                {{ row.recipe_supper.name }}
-                            </button>
-                            {% else %}
-                            <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if row.recipe_dinner_alternative %}
-                            <button type="button" class="btn btn-link p-0 text-start recipe-trigger"
-                                data-recipe-name="{{ row.recipe_dinner_alternative.name|escape }}"
-                                data-recipe-description="{{ row.recipe_dinner_alternative.description|default:'Brak opisu'|escape }}"
-                                data-preparation-time="{{ row.recipe_dinner_alternative.preparation_time }}"
-                                data-servings="{{ row.recipe_dinner_alternative.servings }}"
-                                data-category="{{ row.recipe_dinner_alternative.category|default:'Brak kategorii'|escape }}"
-                                data-recipe-ingredients='[{% for ing in row.recipe_dinner_alternative.ingredients.all %}{"name": "{{ ing.ingredient.name|escapejs }}", "amount": "{{ ing.amount }}", "unit": "{{ ing.unit|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}]'
-                                data-recipe-instructions="{{ row.recipe_dinner_alternative.instructions|escape }}">
-                                {{ row.recipe_dinner_alternative.name }}
-                            </button>
-                            {% else %}
-                            <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-center small">
-                            {% if row.calories_main > 0 or row.calories_alt > 0 %}
-                            <span title="Obiad + Kolacja">{{ row.calories_main|floatformat:0 }}</span>
-                            {% if row.calories_alt > 0 and row.calories_alt != row.calories_main %}
-                            <span class="text-muted"> | </span>
-                            <span class="text-secondary" title="Alternatywa + Kolacja">{{ row.calories_alt|floatformat:0 }}</span>
-                            {% endif %}
-                            {% else %}
-                            <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-    </div>
-</div>
-{% endfor %}
-
-<div class="modal fade" id="recipeModal" tabindex="-1" aria-labelledby="recipeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="recipeModalLabel">Szczegóły przepisu</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </form>
+            <!-- Modal: przepis -->
+            <div class="modal fade" id="recipeModal" tabindex="-1" aria-labelledby="recipeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="recipeModalLabel">Przepis</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                        </div>
+                        <div class="modal-body" id="recipeModalBody"></div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body" id="recipeModalBody"></div>
-        </div>
-    </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('recipeModal');
-        const modalTitle = document.getElementById('recipeModalLabel');
-        const modalBody = document.getElementById('recipeModalBody');
+            <!-- Modal: Dodaj element do grupy -->
+            <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addItemModalLabel">Dodaj pozycję</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="add-item-form">
+                                {# Typ pozycji jest wybierany w poprzednim modal'u; tutaj tylko pola szczegółów #}
 
-        document.querySelectorAll('.recipe-trigger').forEach(function (button) {
-            button.addEventListener('click', function () {
-                modalTitle.textContent = button.dataset.recipeName || 'Przepis';
-                modalBody.innerHTML = '';
+                                <div id="add-item-recipe" class="mb-3">
+                                        <div id="add-item-selected" class="mb-2">
+                                            <div id="add-item-selected-name" class="fw-semibold"></div>
+                                        </div>
+                                        <select id="add-item-recipe-select" class="form-select d-none">
+                                            <option value="">-- wybierz --</option>
+                                            {% for recipe in recipes %}
+                                            <option value="{{ recipe.pk }}" data-servings="{{ recipe.servings }}">{{ recipe.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="row g-2 mt-2">
+                                        <div class="col-6">
+                                            <label class="form-label">Ilość porcji</label>
+                                            <input id="add-item-recipe-servings" class="form-control" type="number" min="1" placeholder="liczba porcji">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">Gramatura całego dania (g)</label>
+                                            <input id="add-item-recipe-grams" class="form-control" type="text" placeholder="np. 400">
+                                        </div>
+                                    </div>
+                                </div>
 
-                const description = document.createElement('p');
-                description.className = 'mb-3';
-                description.textContent = button.dataset.recipeDescription || 'Brak opisu';
-                modalBody.appendChild(description);
+                                <div id="add-item-ingredient" style="display:none;">
+                                    <select id="add-item-ingredient-select" class="form-select d-none">
+                                        <option value="">-- wybierz --</option>
+                                        {% for ing in ingredients %}
+                                            <option value="{{ ing.pk }}" data-default-unit="{{ ing.default_unit|default:'' }}">{{ ing.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="mb-2">
+                                        <div id="add-item-selected-ingredient" class="mb-2">
+                                            <div id="add-item-selected-name-ingredient" class="fw-semibold"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label">Ilość</label>
+                                            <input id="add-item-ingredient-amount" class="form-control" type="text">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">Jednostka</label>
+                                            <input id="add-item-ingredient-unit" class="form-control" type="text">
+                                        </div>
+                                    </div>
+            
+                                        <!-- Choose item modal: searchable list of recipes and ingredients -->
+                                        <div class="modal fade" id="chooseItemModal" tabindex="-1" aria-labelledby="chooseItemModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="chooseItemModalLabel">Wybierz przepis lub składnik</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Szukaj</label>
+                                                            <select id="choose-item-select" class="form-select">
+                                                                <option value="">-- wyszukaj przepis lub składnik --</option>
+                                                                <optgroup label="Przepisy">
+                                                                {% for r in recipes %}
+                                                                    <option value="recipe:{{ r.pk }}" data-servings="{{ r.servings }}">[Przepis] {{ r.name }}</option>
+                                                                {% endfor %}
+                                                                </optgroup>
+                                                                <optgroup label="Składniki">
+                                                                {% for ing in ingredients %}
+                                                                    <option value="ingredient:{{ ing.pk }}" data-default-unit="{{ ing.default_unit|default:'' }}">[Składnik] {{ ing.name }}</option>
+                                                                {% endfor %}
+                                                                </optgroup>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                                                        <button type="button" class="btn btn-primary" id="choose-item-next">Dalej</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
 
-                const metaList = document.createElement('ul');
-                metaList.className = 'list-unstyled small text-muted mb-3';
-                const metaItems = [
-                    ['Czas przygotowania', button.dataset.preparationTime + ' min'],
-                    ['Porcje', button.dataset.servings],
-                    ['Kategoria', button.dataset.category]
-                ];
+                                <input type="hidden" id="add-item-planner" value="">
+                                <input type="hidden" id="add-item-row" value="">
+                                <input type="hidden" id="add-item-meal" value="">
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                            <button type="button" class="btn btn-primary" id="add-item-submit">Dodaj</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                metaItems.forEach(function ([label, value]) {
-                    const item = document.createElement('li');
-                    item.className = 'mb-2';
-                    item.innerHTML = '<strong>' + label + ':</strong> ' + value;
-                    metaList.appendChild(item);
-                });
-                modalBody.appendChild(metaList);
-
-                // Składniki jako lista
-                const ingredientsHeader = document.createElement('h6');
-                ingredientsHeader.className = 'fw-bold mt-3 mb-2';
-                ingredientsHeader.textContent = 'Składniki';
-                modalBody.appendChild(ingredientsHeader);
-
-                try {
-                    const ingredientsData = JSON.parse(button.dataset.recipeIngredients || '[]');
-                    if (ingredientsData.length > 0) {
-                        const ingredientsList = document.createElement('ul');
-                        ingredientsList.className = 'small ps-3 mb-0';
-                        ingredientsData.forEach(function(ing) {
-                            const li = document.createElement('li');
-                            li.className = 'mb-1';
-                            const amount = parseFloat(ing.amount);
-                            const formattedAmount = Number.isInteger(amount) ? amount.toString() : amount.toFixed(2).replace(/\.?0+$/, '');
-                            li.textContent = formattedAmount + ' ' + ing.unit + ' ' + ing.name;
-                            ingredientsList.appendChild(li);
+            <script>
+                window.addEventListener('load', function () {
+                    // Aktywacja dzisiejszego dnia
+                    try {
+                        const dayMap = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
+                        const todayName = dayMap[new Date().getDay()];
+                        document.querySelectorAll('[id^="planner-tabs-"]').forEach(function (tablist) {
+                            const tabs = tablist.querySelectorAll('.nav-link');
+                            let activated = false;
+                            tabs.forEach(function (tab) {
+                                if (tab.dataset.day === todayName) {
+                                    new bootstrap.Tab(tab).show();
+                                    activated = true;
+                                }
+                            });
+                            if (!activated && tabs.length > 0) new bootstrap.Tab(tabs[0]).show();
                         });
-                        modalBody.appendChild(ingredientsList);
-                    } else {
-                        const noIngredients = document.createElement('p');
-                        noIngredients.className = 'small text-muted';
-                        noIngredients.textContent = 'Brak składników';
-                        modalBody.appendChild(noIngredients);
+                    } catch (e) {
+                        // ignore
                     }
-                } catch (e) {
-                    const errorMsg = document.createElement('p');
-                    errorMsg.className = 'small text-muted';
-                    errorMsg.textContent = 'Brak danych o składnikach';
-                    modalBody.appendChild(errorMsg);
-                }
 
-                // Kroki przygotowania
-                const instructions = button.dataset.recipeInstructions;
-                if (instructions && instructions.trim()) {
-                    const instructionsHeader = document.createElement('h6');
-                    instructionsHeader.className = 'fw-bold mt-3 mb-2';
-                    instructionsHeader.textContent = 'Kroki przygotowania';
-                    modalBody.appendChild(instructionsHeader);
+                    // Modal z przepisem
+                    const modal = document.getElementById('recipeModal');
+                    const modalTitle = document.getElementById('recipeModalLabel');
+                    const modalBody = document.getElementById('recipeModalBody');
+                    if (modal) {
+                        document.querySelectorAll('.recipe-trigger').forEach(function (button) {
+                            button.addEventListener('click', function () {
+                                modalTitle.textContent = button.dataset.recipeName || 'Przepis';
+                                modalBody.innerHTML = '';
 
-                    const instructionsList = document.createElement('ol');
-                    instructionsList.className = 'small ps-3 mb-0';
-                    const steps = instructions.split('\n').filter(step => step.trim());
-                    steps.forEach(function(step) {
-                        const li = document.createElement('li');
-                        li.className = 'mb-1';
-                        li.textContent = step.trim();
-                        instructionsList.appendChild(li);
+                                const description = document.createElement('p');
+                                description.className = 'mb-3';
+                                description.textContent = button.dataset.recipeDescription || 'Brak opisu';
+                                modalBody.appendChild(description);
+
+                                const metaList = document.createElement('ul');
+                                metaList.className = 'list-unstyled small text-muted mb-3';
+                                const metaItems = [
+                                    ['Czas przygotowania', (button.dataset.preparationTime || '') + ' min'],
+                                    ['Porcje', button.dataset.servings || ''],
+                                    ['Kategoria', button.dataset.category || '']
+                                ];
+                                metaItems.forEach(function (it) {
+                                    const li = document.createElement('li');
+                                    li.className = 'mb-2';
+                                    li.innerHTML = '<strong>' + it[0] + ':</strong> ' + it[1];
+                                    metaList.appendChild(li);
+                                });
+                                modalBody.appendChild(metaList);
+
+                                // Ingredients
+                                try {
+                                    const ingredients = JSON.parse(button.dataset.recipeIngredients || '[]');
+                                    if (ingredients.length) {
+                                        const h = document.createElement('h6');
+                                        h.className = 'fw-bold mt-3 mb-2';
+                                        h.textContent = 'Składniki';
+                                        modalBody.appendChild(h);
+                                        const ul = document.createElement('ul');
+                                        ul.className = 'small ps-3 mb-0';
+                                        ingredients.forEach(function (ing) {
+                                            const li = document.createElement('li');
+                                            li.className = 'mb-1';
+                                            li.textContent = (ing.amount || '') + ' ' + (ing.unit || '') + ' ' + (ing.name || '');
+                                            ul.appendChild(li);
+                                        });
+                                        modalBody.appendChild(ul);
+                                    }
+                                } catch (e) {
+                                    // ignore
+                                }
+
+                                // Instructions
+                                const instr = button.dataset.recipeInstructions || '';
+                                if (instr.trim()) {
+                                    const h2 = document.createElement('h6');
+                                    h2.className = 'fw-bold mt-3 mb-2';
+                                    h2.textContent = 'Kroki przygotowania';
+                                    modalBody.appendChild(h2);
+                                    const ol = document.createElement('ol');
+                                    ol.className = 'small ps-3 mb-0';
+                                    instr.split('\n').filter(Boolean).forEach(function (step) {
+                                        const li = document.createElement('li');
+                                        li.className = 'mb-1';
+                                        li.textContent = step.trim();
+                                        ol.appendChild(li);
+                                    });
+                                    modalBody.appendChild(ol);
+                                }
+
+                                new bootstrap.Modal(modal).show();
+                            });
+                        });
+                    }
+                });
+            </script>
+            <script>
+                window.addEventListener('load', function () {
+                    const addItemModalEl = document.getElementById('addItemModal');
+                    const addItemModal = addItemModalEl ? new bootstrap.Modal(addItemModalEl) : null;
+                    const chooseItemModalEl = document.getElementById('chooseItemModal');
+                    const chooseItemModal = chooseItemModalEl ? new bootstrap.Modal(chooseItemModalEl) : null;
+                    const chooseSelect = document.getElementById('choose-item-select');
+                    // currentAddItemType is set from the choose modal (either 'recipe' or 'ingredient')
+                    let currentAddItemType = 'recipe';
+                    const recipeBlock = document.getElementById('add-item-recipe');
+                    const ingredientBlock = document.getElementById('add-item-ingredient');
+                    const plannerInput = document.getElementById('add-item-planner');
+                    const rowInput = document.getElementById('add-item-row');
+                    const mealInput = document.getElementById('add-item-meal');
+
+                    document.querySelectorAll('.add-item-btn').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            plannerInput.value = btn.dataset.planner || '';
+                            rowInput.value = btn.dataset.row || '';
+                            mealInput.value = btn.dataset.meal || '';
+                            // reset choose select
+                            if (chooseSelect) chooseSelect.value = '';
+                            // ensure modal elements are appended to body to avoid clipping/z-index issues
+                            try {
+                                if (chooseItemModalEl && chooseItemModalEl.parentNode !== document.body) document.body.appendChild(chooseItemModalEl);
+                                if (addItemModalEl && addItemModalEl.parentNode !== document.body) document.body.appendChild(addItemModalEl);
+                            } catch (e) {
+                                // ignore
+                            }
+                            if (chooseItemModal) chooseItemModal.show();
+                        });
                     });
-                    modalBody.appendChild(instructionsList);
-                }
 
-                const modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
-                modalInstance.show();
-            });
-        });
-    });
-</script>
+                    // initialize Tom-Select on selects for better search UX (if available)
+                    try {
+                        if (typeof TomSelect !== 'undefined') {
+                            const tsRecipe = document.getElementById('add-item-recipe-select');
+                            if (tsRecipe && !tsRecipe.tomSelect) new TomSelect(tsRecipe, {allowEmptyOption: true});
+                            // do not instantiate TomSelect for the hidden ingredient select (we use the choose modal to pick ingredients)
+                            const tsChoose = document.getElementById('choose-item-select');
+                            if (tsChoose && !tsChoose.tomSelect) new TomSelect(tsChoose, {searchField: ["text"], allowEmptyOption: true});
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+
+                    // when choose modal is shown by Bootstrap, set planner/row/meal from triggering button
+                    if (chooseItemModalEl) {
+                        chooseItemModalEl.addEventListener('show.bs.modal', function (evt) {
+                            const trigger = evt.relatedTarget;
+                            if (trigger) {
+                                plannerInput.value = trigger.dataset.planner || '';
+                                rowInput.value = trigger.dataset.row || '';
+                                mealInput.value = trigger.dataset.meal || '';
+                            }
+                            // reset choose select
+                            if (chooseSelect) chooseSelect.value = '';
+                        });
+                    }
+
+                    // utility: get csrf token from cookie
+                    function getCSRF() {
+                        const v = document.cookie.match('(^|;)\\s*' + 'csrftoken' + '\\s*=\\s*([^;]+)');
+                        return v ? v.pop() : '';
+                    }
+
+                    // format nutrition summary
+                    function formatNutrition(n) {
+                        if (!n) return '';
+                        return (n.calories !== undefined ? n.calories + ' kcal' : '') + ' | B: ' + (n.protein || 0) + ' | W: ' + (n.carbohydrates || 0) + ' | T: ' + (n.fat || 0);
+                    }
+
+                    // update totals for a given meal container
+                    function updateMealTotals(plannerSlug, rowPk, mealName) {
+                        const itemsContainerId = 'items-' + plannerSlug + '-' + rowPk + '-' + mealName;
+                        const totalsId = 'totals-' + plannerSlug + '-' + rowPk + '-' + mealName;
+                        const container = document.getElementById(itemsContainerId);
+                        const totalsEl = document.getElementById(totalsId);
+                        if (!container || !totalsEl) return;
+                        let cal = 0, prot = 0, carbs = 0, fat = 0;
+                        container.querySelectorAll('.item-entry-row').forEach(function (row) {
+                            const c = parseFloat(row.dataset.calories || 0) || 0;
+                            const p = parseFloat(row.dataset.protein || 0) || 0;
+                            const cb = parseFloat(row.dataset.carbohydrates || 0) || 0;
+                            const f = parseFloat(row.dataset.fat || 0) || 0;
+                            cal += c; prot += p; carbs += cb; fat += f;
+                        });
+                        if (cal || prot || carbs || fat) {
+                            totalsEl.textContent = formatNutrition({calories: Math.round(cal*10)/10, protein: Math.round(prot*10)/10, carbohydrates: Math.round(carbs*10)/10, fat: Math.round(fat*10)/10});
+                        } else {
+                            totalsEl.textContent = '';
+                        }
+                        return {calories: cal, protein: prot, carbohydrates: carbs, fat: fat};
+                    }
+
+                    // update daily totals (sum of all meal containers for row)
+                    function updateRowTotals(plannerSlug, rowPk) {
+                        // find all meal containers for this planner/row
+                        const selector = '.meal-items[data-planner-slug="' + plannerSlug + '"][data-row="' + rowPk + '"]';
+                        const containers = document.querySelectorAll(selector);
+                        let dayCal = 0, dayProt = 0, dayCarbs = 0, dayFat = 0;
+                        containers.forEach(function (container) {
+                            container.querySelectorAll('.item-entry-row').forEach(function (row) {
+                                const c = parseFloat(row.dataset.calories || 0) || 0;
+                                const p = parseFloat(row.dataset.protein || 0) || 0;
+                                const cb = parseFloat(row.dataset.carbohydrates || 0) || 0;
+                                const f = parseFloat(row.dataset.fat || 0) || 0;
+                                dayCal += c; dayProt += p; dayCarbs += cb; dayFat += f;
+                            });
+                        });
+                        // update DOM
+                        const dayCalEl = document.getElementById('daycal-' + plannerSlug + '-' + rowPk);
+                        const dayMacroEl = document.getElementById('daymacro-' + plannerSlug + '-' + rowPk);
+                        if (dayCalEl) {
+                            if (dayCal) dayCalEl.textContent = Math.round(dayCal*10)/10;
+                            else dayCalEl.textContent = '—';
+                        }
+                        if (dayMacroEl) {
+                            dayMacroEl.textContent = 'B: ' + (Math.round(dayProt*10)/10 || 0) + ' | W: ' + (Math.round(dayCarbs*10)/10 || 0) + ' | T: ' + (Math.round(dayFat*10)/10 || 0);
+                        }
+                        return {calories: dayCal, protein: dayProt, carbohydrates: dayCarbs, fat: dayFat};
+                    }
+
+                    // initial totals calculation for existing items
+                    const rowsToUpdate = new Set();
+                    document.querySelectorAll('.meal-items').forEach(function (el) {
+                        const plannerSlug = el.dataset.plannerSlug;
+                        const rowPk = el.dataset.row;
+                        const mealName = el.dataset.meal;
+                        updateMealTotals(plannerSlug, rowPk, mealName);
+                        rowsToUpdate.add(plannerSlug + '|' + rowPk);
+                    });
+                    rowsToUpdate.forEach(function (k) {
+                        const parts = k.split('|');
+                        updateRowTotals(parts[0], parts[1]);
+                    });
+
+                    // handle remove clicks via delegation
+                    document.addEventListener('click', function (evt) {
+                        const btn = evt.target.closest('.remove-item-btn');
+                        if (!btn) return;
+                        const itemId = btn.dataset.itemId;
+                        if (!itemId) return;
+                        btn.disabled = true;
+                        fetch(window.location.pathname, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                                'X-CSRFToken': getCSRF()
+                            },
+                            body: new URLSearchParams({action: 'delete_item', item_id: itemId})
+                        })
+                        .then(function (resp) { return resp.json(); })
+                        .then(function (data) {
+                            if (data && data.status === 'ok') {
+                                const rowDiv = btn.closest('.item-entry-row');
+                                if (rowDiv) {
+                                    const container = rowDiv.parentNode;
+                                    // capture planner/row/meal from container
+                                    const plannerSlug = container.dataset.plannerSlug;
+                                    const rowPk = container.dataset.row;
+                                    const mealName = container.dataset.meal;
+                                    rowDiv.remove();
+                                    updateMealTotals(plannerSlug, rowPk, mealName);
+                                    try { updateRowTotals(plannerSlug, rowPk); } catch (e) { }
+                                }
+                            } else {
+                                alert('Błąd usuwania');
+                                btn.disabled = false;
+                            }
+                        }).catch(function (err) { console.error(err); alert('Błąd usuwania'); btn.disabled = false; });
+                    });
+
+                    // when user confirms selection in choose modal, populate add-item modal and show it
+                    const chooseNext = document.getElementById('choose-item-next');
+                    if (chooseNext) {
+                        chooseNext.addEventListener('click', function () {
+                            const val = chooseSelect ? chooseSelect.value : '';
+                            if (!val) return;
+                            const parts = val.split(':');
+                            const kind = parts[0];
+                            const id = parts[1];
+                            // set type and populate fields
+                                if (kind === 'recipe') {
+                                currentAddItemType = 'recipe';
+                                if (recipeBlock) recipeBlock.style.display = '';
+                                if (ingredientBlock) ingredientBlock.style.display = 'none';
+                                const sel = document.getElementById('add-item-recipe-select');
+                                const servingsInput = document.getElementById('add-item-recipe-servings');
+                                const gramsInput = document.getElementById('add-item-recipe-grams');
+                                if (sel) {
+                                    sel.value = id;
+                                        const opt = chooseSelect.options[chooseSelect.selectedIndex];
+                                        if (opt && opt.dataset && opt.dataset.servings && servingsInput) servingsInput.value = opt.dataset.servings;
+                                        if (gramsInput) gramsInput.value = '';
+                                        // show selected name label
+                                        const nameLabel = document.getElementById('add-item-selected-name');
+                                        if (nameLabel) nameLabel.textContent = opt ? opt.text.replace(/^[\[][^\]]*\]\s*/, '') : '';
+                                    if (typeof TomSelect !== 'undefined' && sel.tomselect) sel.tomselect.setValue(id);
+                                }
+                            } else {
+                                currentAddItemType = 'ingredient';
+                                if (recipeBlock) recipeBlock.style.display = 'none';
+                                if (ingredientBlock) ingredientBlock.style.display = '';
+                                const sel = document.getElementById('add-item-ingredient-select');
+                                    const nameLabelIng = document.getElementById('add-item-selected-name-ingredient');
+                                const unitInput = document.getElementById('add-item-ingredient-unit');
+                                if (sel) {
+                                    sel.value = id;
+                                    if (typeof TomSelect !== 'undefined' && sel.tomselect) sel.tomselect.setValue(id);
+                                    // set free text to selected option text
+                                        const opt = sel.options[sel.selectedIndex];
+                                        if (opt && nameLabelIng) nameLabelIng.textContent = opt.text.replace(/^[\[][^\]]*\]\s*/, '');
+                                        if (opt && unitInput && opt.dataset && opt.dataset.defaultUnit) unitInput.value = opt.dataset.defaultUnit;
+                                } else if (free) {
+                                        // fallback: set label from choose select
+                                        const opt2 = chooseSelect.options[chooseSelect.selectedIndex];
+                                        if (opt2 && nameLabelIng) nameLabelIng.textContent = opt2.text.replace(/^[\[][^\]]*\]\s*/, '');
+                                }
+                            }
+                            if (chooseItemModal) chooseItemModal.hide();
+                            if (addItemModal) addItemModal.show();
+                        });
+                    }
+
+                    // no type select here; type is provided by the choose modal
+
+                    // when ingredient select in add-item modal changes, fill default unit
+                    const addItemIngredientSelect = document.getElementById('add-item-ingredient-select');
+                    const addItemIngredientUnit = document.getElementById('add-item-ingredient-unit');
+                    if (addItemIngredientSelect) {
+                        addItemIngredientSelect.addEventListener('change', function () {
+                            const opt = addItemIngredientSelect.options[addItemIngredientSelect.selectedIndex];
+                            if (opt && opt.dataset && opt.dataset.defaultUnit && addItemIngredientUnit) {
+                                addItemIngredientUnit.value = opt.dataset.defaultUnit;
+                            }
+                        });
+                    }
+
+                    document.getElementById('add-item-submit').addEventListener('click', function () {
+                        const submitBtn = this;
+                        const planner = plannerInput.value;
+                        const row = rowInput.value;
+                        const meal = mealInput.value;
+                        const type = currentAddItemType;
+                        let displayText = '';
+                        let payload = {};
+
+                        if (type === 'recipe') {
+                            const sel = document.getElementById('add-item-recipe-select');
+                            const val = sel.value;
+                            const name = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+                            if (!val) return; // nothing selected
+                            const servings = document.getElementById('add-item-recipe-servings').value.trim();
+                            const grams = document.getElementById('add-item-recipe-grams').value.trim();
+                            if (grams) {
+                                displayText = name + ' — ' + grams + ' g';
+                            } else if (servings) {
+                                displayText = name + ' — ' + servings + ' porcji';
+                            } else {
+                                displayText = name;
+                            }
+                            payload = {type: 'recipe', id: val, name: name, servings: servings || null, grams: grams || null};
+                        } else {
+                            const sel = document.getElementById('add-item-ingredient-select');
+                            if (!sel || !sel.value) return; // require selected ingredient
+                            const opt = sel.options[sel.selectedIndex];
+                            const name = opt ? opt.text.replace(/^\[.*?\]\s*/, '') : '';
+                            const amount = document.getElementById('add-item-ingredient-amount').value.trim();
+                            const unit = document.getElementById('add-item-ingredient-unit').value.trim();
+                            if (!name) return;
+                            displayText = name + (amount ? ' — ' + amount + (unit ? ' ' + unit : '') : '');
+                            payload = {type: 'ingredient', id: sel.value, name: name, amount: amount, unit: unit};
+                        }
+
+                        // send AJAX to save item immediately
+                        try {
+                            // helper to read csrftoken cookie
+                            function getCookie(name) {
+                                const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+                                return v ? v.pop() : '';
+                            }
+
+                            submitBtn.disabled = true;
+                            fetch(window.location.pathname, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                                    'X-CSRFToken': getCookie('csrftoken')
+                                },
+                                body: new URLSearchParams({
+                                    action: 'add_item',
+                                    planner_name: planner,
+                                    row: row,
+                                    meal: meal,
+                                    payload: JSON.stringify(payload)
+                                })
+                            })
+                            .then(function (resp) { return resp.json(); })
+                            .then(function (data) {
+                                if (data && data.status === 'ok') {
+                                    // create badge in UI using server-acknowledged name
+                                    const itemsContainerId = 'items-' + planner + '-' + row + '-' + meal;
+                                    const itemsContainer = document.getElementById(itemsContainerId);
+                                    if (itemsContainer) {
+                                        const rowDiv = document.createElement('div');
+                                        rowDiv.className = 'd-flex justify-content-between align-items-center mb-1 item-entry-row';
+                                        rowDiv.dataset.type = data.type || '';
+                                        rowDiv.dataset.itemId = data.id || '';
+                                        if (data.nutrition) {
+                                            rowDiv.dataset.calories = data.nutrition.calories || 0;
+                                            rowDiv.dataset.protein = data.nutrition.protein || 0;
+                                            rowDiv.dataset.carbohydrates = data.nutrition.carbohydrates || 0;
+                                            rowDiv.dataset.fat = data.nutrition.fat || 0;
+                                        }
+                                        const left = document.createElement('div');
+                                        left.className = 'flex-grow-1';
+                                        left.textContent = data.name || displayText;
+                                        const rightWrap = document.createElement('div');
+                                        rightWrap.className = 'd-flex align-items-center';
+                                        const right = document.createElement('div');
+                                        right.className = 'text-muted small text-end ms-2 me-2';
+                                        if (data.nutrition) {
+                                            const n = data.nutrition;
+                                            right.textContent = (n.calories !== undefined ? n.calories + ' kcal' : '') + ' | B: ' + (n.protein || 0) + ' | W: ' + (n.carbohydrates || 0) + ' | T: ' + (n.fat || 0);
+                                        }
+                                        const removeBtn = document.createElement('button');
+                                        removeBtn.type = 'button';
+                                        removeBtn.className = 'btn btn-sm btn-link text-danger remove-item-btn';
+                                        removeBtn.dataset.itemId = data.id || '';
+                                        removeBtn.textContent = '×';
+                                        rightWrap.appendChild(right);
+                                        rightWrap.appendChild(removeBtn);
+                                        rowDiv.appendChild(left);
+                                        rowDiv.appendChild(rightWrap);
+                                        itemsContainer.appendChild(rowDiv);
+                                    }
+                                    // update totals for this meal
+                                                    try { updateMealTotals(planner, row, meal); updateRowTotals(planner, row); } catch (e) { }
+                                    if (addItemModal) addItemModal.hide();
+                                } else {
+                                    alert('Błąd zapisu: nie otrzymano potwierdzenia z serwera.');
+                                }
+                            })
+                            .catch(function (err) { console.error(err); alert('Błąd zapisu'); })
+                            .finally(function () { submitBtn.disabled = false; });
+                        } catch (e) {
+                            console.error(e);
+                            submitBtn.disabled = false;
+                        }
+                    });
+                });
+            </script>
+        </div>
+    </div>
+    {% endfor %}
 {% endblock %}

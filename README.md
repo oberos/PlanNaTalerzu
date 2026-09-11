@@ -83,3 +83,12 @@ Lub użyj gotowego skryptu repozytorium:
 ```bash
 ./load_recipe_fixtures.sh
 ```
+
+# For updates
+```bash
+cd ~/PlanNaTalerzu
+git pull
+.venv/bin/python plannatalerzu/manage.py migrate
+```
+# TODO
+add auto update script and service

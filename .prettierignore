@@ -1,0 +1,3 @@
+# Ignore Django/Jinja templates to avoid Prettier reformatting
+plannatalerzu/**/templates/**/*.html
+plannatalerzu/planner/templates/planner/index.html

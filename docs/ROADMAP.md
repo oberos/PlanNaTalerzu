@@ -27,6 +27,7 @@ Aplikacja do planowania posiłków i zarządzania przepisami kulinarnymi.
 | [13](tasks/13.md) | Format schema.org Recipe | 🟢 Niski | ✅ Zaimplementowane |
 | [14](tasks/14.md) | Eksport pojedynczego przepisu | 🟢 Niski | ⬜ Do zrobienia |
 | [15](tasks/15.md) | Ulepszone wyszukiwanie składników | 🟢 Niski | ✅ Zaimplementowane |
+| [16](tasks/16.md) | Ulepszenia UI | 🔴 Wysoki | ✅ Zaimplementowane |
 
 ---
 

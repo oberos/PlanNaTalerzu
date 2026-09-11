@@ -1,4 +1,13 @@
 {
+  "files.associations": {
+    "**/templates/**/*.html": "django-html"
+  },
+  "[django-html]": {
+    "editor.defaultFormatter": null,
+    "editor.formatOnSave": false
+  }
+}
+{
     "chat.tools.terminal.autoApprove": {
         "pdm": true
     }
