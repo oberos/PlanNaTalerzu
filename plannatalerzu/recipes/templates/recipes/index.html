@@ -3,267 +3,401 @@
 {% block title %}Przepisy{% endblock %}
 
 {% block content %}
-<div class="row g-4">
-    <div class="col-lg-5">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h1 class="h3 fw-bold mb-0">
-                        {% if editing_recipe %}Edytuj przepis{% else %}Dodaj przepis{% endif %}
-                    </h1>
-                    {% if editing_recipe %}
-                    <a class="btn btn-outline-secondary btn-sm" href="{% url 'recipes:index' %}">Anuluj</a>
-                    {% endif %}
-                </div>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <h1 class="h2 fw-bold mb-0">Przepisy</h1>
+    <div class="d-flex align-items-center gap-2 w-100 w-md-auto">
+        <div class="input-group input-group-sm flex-grow-1">
+            <input id="recipe-search" name="q" type="search" class="form-control" placeholder="Szukaj przepisu..." value="{{ query|default:'' }}">
+            <button class="btn btn-outline-secondary" type="button">Szukaj</button>
+        </div>
+        <button type="button" class="btn btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#recipeModal">
+            +
+        </button>
+    </div>
+</div>
 
+<div class="row g-4 align-items-stretch">
+    <div id="no-recipes-search" class="col-12 text-muted" style="display:none;">Brak przepisów pasujących do zapytania.</div>
+    {% if recipes %}
+        {% for recipe in recipes %}
+            {% with nutrition=recipe.calculate_nutrition %}
+                <div class="col-12 col-md-6 col-xl-4">
+                    <article class="recipe-card card h-100 border-0 shadow-sm rounded-4 overflow-hidden" data-recipe-name="{{ recipe.name|lower }}">
+                        {% if recipe.image %}
+                            <img src="{{ recipe.image.url }}" class="card-img-top" alt="{{ recipe.name }}" style="height: 180px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body d-flex flex-column p-3">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h2 class="h5 fw-bold mb-0">{{ recipe.name }}</h2>
+                                {% if recipe.category %}
+                                    <span class="badge rounded-pill bg-light text-dark">{{ recipe.category }}</span>
+                                {% endif %}
+                            </div>
+
+                            {% if recipe.description %}
+                                <p class="text-muted small mb-3">{{ recipe.description|truncatechars:110 }}</p>
+                            {% else %}
+                                <p class="text-muted small mb-3">Brak opisu</p>
+                            {% endif %}
+
+                            <div class="d-flex flex-wrap gap-2 small text-muted mb-3">
+                                <span class="d-inline-flex align-items-center gap-1">⏱ {{ recipe.preparation_time }} min</span>
+                                <span class="d-inline-flex align-items-center gap-1">🔥 {{ nutrition.per_serving.calories|default:'0' }} kcal</span>
+                                <span class="d-inline-flex align-items-center gap-1">💪 {{ nutrition.per_serving.protein|default:'0' }} g białka</span>
+                            </div>
+
+                            {% if recipe.category or recipe.servings %}
+                                <div class="d-flex flex-wrap gap-2 small text-muted mb-3">
+                                    {% if recipe.category %}
+                                        <span class="d-inline-flex align-items-center gap-1">🏷 {{ recipe.category }}</span>
+                                    {% endif %}
+                                    {% if recipe.servings %}
+                                        <span class="d-inline-flex align-items-center gap-1">👥 {{ recipe.servings }} os.</span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mt-auto d-grid gap-2">
+                                <a href="{% url 'recipes:index' %}?recipe={{ recipe.pk }}" class="btn btn-outline-primary btn-sm">Pokaż przepis</a>
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'recipes:index' %}?edit={{ recipe.pk }}" class="btn btn-outline-secondary btn-sm flex-grow-1">Edytuj</a>
+                                    <form method="post" class="d-inline-flex flex-grow-1 m-0">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="recipe_id" value="{{ recipe.pk }}">
+                                        <button class="btn btn-outline-danger btn-sm w-100" type="submit">Usuń</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            {% endwith %}
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-light border text-center text-muted mb-0">Brak przepisów. Dodaj pierwszy przepis.</div>
+        </div>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="recipeDetailModal" tabindex="-1" aria-labelledby="recipeDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="recipeDetailModalLabel">Szczegóły przepisu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body">
+                {% if detail_recipe %}
+                    {% if detail_recipe.image %}
+                        <img src="{{ detail_recipe.image.url }}" class="img-fluid rounded-3 mb-3" alt="{{ detail_recipe.name }}" style="max-height: 260px; width: 100%; object-fit: cover;">
+                    {% endif %}
+
+                    <h3 class="h4 fw-bold mb-3">{{ detail_recipe.name }}</h3>
+
+                    {% if detail_recipe.description %}
+                        <p class="text-muted mb-3">{{ detail_recipe.description }}</p>
+                    {% endif %}
+
+                    <div class="d-flex flex-wrap gap-2 small text-muted mb-4">
+                        <span class="d-inline-flex align-items-center gap-1">⏱ {{ detail_recipe.preparation_time }} min</span>
+                        <span class="d-inline-flex align-items-center gap-1">👥 {{ detail_recipe.servings }} os.</span>
+                        {% if detail_recipe.category %}
+                            <span class="d-inline-flex align-items-center gap-1">🏷 {{ detail_recipe.category }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% with nutrition=detail_recipe.calculate_nutrition %}
+                        {% if nutrition.total.has_nutrition_data %}
+                            <div class="mb-4">
+                                <h4 class="h6 fw-bold mb-2">Wartości odżywcze</h4>
+                                <div class="row g-2 small text-muted">
+                                    <div class="col-6">
+                                        <div class="border rounded p-2">🔥 {{ nutrition.per_serving.calories }} kcal</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="border rounded p-2">💪 {{ nutrition.per_serving.protein }} g białka</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    {% if detail_recipe.ingredients.all %}
+                        <div class="mb-4">
+                            <h4 class="h6 fw-bold mb-2">Składniki</h4>
+                            <ul class="mb-0 ps-3">
+                                {% for relation in detail_recipe.ingredients.all %}
+                                    <li><span class="fw-semibold">{{ relation.ingredient.name }}</span> — {{ relation.amount|floatformat:'-2' }} {{ relation.unit }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    {% if detail_recipe.instructions %}
+                        <div>
+                            <h4 class="h6 fw-bold mb-2">Przygotowanie</h4>
+                            <ol class="mb-0 ps-3">
+                                {% for step in detail_recipe.instructions.splitlines %}
+                                    {% if step.strip %}
+                                        <li>{{ step }}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted mb-0">Brak danych przepisu.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="recipeModal" tabindex="-1" aria-labelledby="recipeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="recipeModalLabel">
+                    {% if editing_recipe %}Edytuj przepis{% else %}Dodaj przepis{% endif %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="{% if editing_recipe %}update{% else %}create{% endif %}">
                     {% if editing_recipe %}
-                    <input type="hidden" name="recipe_id" value="{{ editing_recipe.pk }}">
+                        <input type="hidden" name="recipe_id" value="{{ editing_recipe.pk }}">
                     {% endif %}
 
                     <div class="mb-3">
-                        <label class="form-label" for="name">Nazwa</label>
-                        <input class="form-control" id="name" name="name" value="{{ editing_recipe.name|default:'' }}"
-                            required>
+                        <label class="form-label" for="recipe-name">Nazwa</label>
+                        <input class="form-control" id="recipe-name" name="name" value="{{ editing_recipe.name|default:'' }}" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" for="description">Opis</label>
-                        <textarea class="form-control" id="description" name="description"
-                            rows="3">{{ editing_recipe.description|default:'' }}</textarea>
+                        <label class="form-label" for="recipe-description">Opis</label>
+                        <textarea class="form-control" id="recipe-description" name="description" rows="3">{{ editing_recipe.description|default:'' }}</textarea>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" for="instructions">Kroki przygotowania</label>
-                        <textarea class="form-control" id="instructions" name="instructions" rows="5"
-                            placeholder="Wpisz każdy krok w nowej linii, np.:&#10;1. Zagotuj wodę&#10;2. Dodaj makaron&#10;3. Gotuj 10 minut">{{ editing_recipe.instructions|default:'' }}</textarea>
+                        <label class="form-label" for="recipe-instructions">Kroki przygotowania</label>
+                        <textarea class="form-control" id="recipe-instructions" name="instructions" rows="5" placeholder="Wpisz każdy krok w nowej linii">{{ editing_recipe.instructions|default:'' }}</textarea>
                         <div class="form-text">Każdy krok przygotowania wpisz w osobnej linii.</div>
                     </div>
 
-                    <div class="row g-3">
+                    <div class="row g-3 mb-4">
                         <div class="col-md-4">
-                            <label class="form-label" for="preparation_time">Czas (min)</label>
-                            <input class="form-control" id="preparation_time" name="preparation_time" type="number"
-                                min="0" value="{{ editing_recipe.preparation_time|default:0 }}">
+                            <label class="form-label" for="recipe-preparation-time">Czas (min)</label>
+                            <input class="form-control" id="recipe-preparation-time" name="preparation_time" type="number" min="0" value="{{ editing_recipe.preparation_time|default:0 }}">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="servings">Porcje</label>
-                            <input class="form-control" id="servings" name="servings" type="number" min="1"
-                                value="{{ editing_recipe.servings|default:1 }}">
+                            <label class="form-label" for="recipe-servings">Porcje</label>
+                            <input class="form-control" id="recipe-servings" name="servings" type="number" min="1" value="{{ editing_recipe.servings|default:1 }}">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="category">Kategoria</label>
-                            <input class="form-control" id="category" name="category"
-                                value="{{ editing_recipe.category|default:'' }}">
+                            <label class="form-label" for="recipe-category">Kategoria</label>
+                            <input class="form-control" id="recipe-category" name="category" value="{{ editing_recipe.category|default:'' }}">
                         </div>
                     </div>
 
-
-
-                    <div class="mt-4">
+                    <div class="mb-4">
                         <label class="form-label">Składniki przepisu</label>
                         <div class="border rounded-3 p-3 bg-light">
-                            <!-- Lista dodanych składników -->
                             <div id="added-ingredients-list" class="mb-3">
                                 {% if editing_recipe %}
-                                {% for rel in editing_recipe.ingredients.all %}
-                                <div
-                                    class="ingredient-item d-flex align-items-center gap-2 mb-2 p-2 bg-white rounded border">
-                                    <input type="hidden" name="ingredient_id" value="{{ rel.ingredient.pk }}">
-                                    <input type="hidden" name="ingredient_amount" value="{{ rel.amount }}">
-                                    <input type="hidden" name="ingredient_unit" value="{{ rel.unit }}">
-                                    <span class="flex-grow-1">
-                                        <strong>{{ rel.ingredient.name }}</strong>
-                                        <span class="text-muted">— {{ rel.amount }} {{ rel.unit }}</span>
-                                    </span>
-                                    <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient"
-                                        title="Usuń">×</button>
-                                </div>
-                                {% endfor %}
+                                    {% for rel in editing_recipe.ingredients.all %}
+                                        <div class="ingredient-item d-flex align-items-center gap-2 mb-2 p-2 bg-white rounded border">
+                                            <input type="hidden" name="ingredient_id" value="{{ rel.ingredient.pk }}">
+                                            <input type="hidden" name="ingredient_amount" value="{{ rel.amount }}">
+                                            <input type="hidden" name="ingredient_unit" value="{{ rel.unit }}">
+                                            <span class="flex-grow-1">
+                                                <strong>{{ rel.ingredient.name }}</strong>
+                                                <span class="text-muted">— {{ rel.amount }} {{ rel.unit }}</span>
+                                            </span>
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient" title="Usuń">×</button>
+                                        </div>
+                                    {% endfor %}
                                 {% endif %}
                             </div>
 
                             {% if editing_recipe and editing_recipe.ingredients.all %}
-                            <div id="no-ingredients-message" class="text-muted small mb-3" style="display: none;">
-                                Brak dodanych składników. Kliknij przycisk poniżej, aby dodać.
-                            </div>
+                                <div id="no-ingredients-message" class="text-muted small mb-3" style="display: none;">Brak dodanych składników. Kliknij przycisk poniżej, aby dodać.</div>
                             {% else %}
-                            <div id="no-ingredients-message" class="text-muted small mb-3">
-                                Brak dodanych składników. Kliknij przycisk poniżej, aby dodać.
-                            </div>
+                                <div id="no-ingredients-message" class="text-muted small mb-3">Brak dodanych składników. Kliknij przycisk poniżej, aby dodać.</div>
                             {% endif %}
 
-                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                                data-bs-target="#ingredientModal">
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#ingredientModal">
                                 + Dodaj składnik
                             </button>
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2 mt-4">
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Anuluj</button>
                         <button class="btn btn-primary" type="submit">
                             {% if editing_recipe %}Zapisz zmiany{% else %}Dodaj przepis{% endif %}
                         </button>
-                        <a class="btn btn-outline-secondary" href="{% url 'home' %}">Powrót do startu</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal dodawania składnika -->
-    <div class="modal fade" id="ingredientModal" tabindex="-1" aria-labelledby="ingredientModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ingredientModalLabel">Dodaj składnik do przepisu</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Wybór istniejącego składnika -->
-                    <div id="select-ingredient-section">
-                        <div class="mb-3">
-                            <label class="form-label" for="modal-ingredient-select">Wybierz składnik</label>
-                            <select id="modal-ingredient-select" placeholder="Wpisz nazwę składnika...">
-                                <option value=""></option>
-                                {% for ingredient in ingredients %}
-                                <option value="{{ ingredient.pk }}" data-name="{{ ingredient.name }}"
-                                    data-unit="{{ ingredient.default_unit }}" data-category="{{ ingredient.category }}">
-                                    {{ ingredient.name }}{% if ingredient.category %} ({{ ingredient.category }})
-                                    {% endif %}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-6">
-                                <label class="form-label" for="modal-ingredient-amount">Ilość</label>
-                                <input type="number" class="form-control" id="modal-ingredient-amount" min="0"
-                                    step="0.01" placeholder="np. 200">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label" for="modal-ingredient-unit">Jednostka</label>
-                                <select class="form-select" id="modal-ingredient-unit">
-                                    <option value="g">g (gramy)</option>
-                                    <option value="kg">kg (kilogramy)</option>
-                                    <option value="ml">ml (mililitry)</option>
-                                    <option value="l">l (litry)</option>
-                                    <option value="szt">szt (sztuki)</option>
-                                    <option value="łyżka">łyżka</option>
-                                    <option value="łyżeczka">łyżeczka</option>
-                                    <option value="szklanka">szklanka</option>
-                                    <option value="szczypta">szczypta</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <button type="button" class="btn btn-primary w-100" id="add-selected-ingredient" disabled>
-                            Dodaj do przepisu
-                        </button>
-
-                        <hr class="my-4">
-
-                        <p class="text-muted small mb-2">Nie znalazłeś składnika na liście?</p>
-                        <button type="button" class="btn btn-outline-secondary w-100" id="show-new-ingredient-form">
-                            Utwórz nowy składnik
-                        </button>
+<div class="modal fade" id="ingredientModal" tabindex="-1" aria-labelledby="ingredientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ingredientModalLabel">Dodaj składnik do przepisu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body">
+                <div id="select-ingredient-section">
+                    <div class="mb-3">
+                        <label class="form-label" for="modal-ingredient-select">Wybierz składnik</label>
+                        <select id="modal-ingredient-select" placeholder="Wpisz nazwę składnika...">
+                            <option value=""></option>
+                            {% for ingredient in ingredients %}
+                                <option value="{{ ingredient.pk }}" data-name="{{ ingredient.name }}" data-unit="{{ ingredient.default_unit }}" data-category="{{ ingredient.category }}">
+                                    {{ ingredient.name }}{% if ingredient.category %} ({{ ingredient.category }}){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
 
-                    <!-- Formularz nowego składnika -->
-                    <div id="new-ingredient-section" style="display: none;">
-                        <div class="mb-3">
-                            <label class="form-label" for="new-ingredient-name-input">Nazwa nowego składnika</label>
-                            <input type="text" class="form-control" id="new-ingredient-name-input"
-                                placeholder="np. tofu">
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label" for="modal-ingredient-amount">Ilość</label>
+                            <input type="number" class="form-control" id="modal-ingredient-amount" min="0" step="0.01" placeholder="np. 200">
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label" for="new-ingredient-category">Kategoria (opcjonalnie)</label>
-                            <input type="text" class="form-control" id="new-ingredient-category"
-                                placeholder="np. nabiał, warzywa">
+                        <div class="col-6">
+                            <label class="form-label" for="modal-ingredient-unit">Jednostka</label>
+                            <select class="form-select" id="modal-ingredient-unit">
+                                <option value="g">g (gramy)</option>
+                                <option value="kg">kg (kilogramy)</option>
+                                <option value="ml">ml (mililitry)</option>
+                                <option value="l">l (litry)</option>
+                                <option value="szt">szt (sztuki)</option>
+                                <option value="łyżka">łyżka</option>
+                                <option value="łyżeczka">łyżeczka</option>
+                                <option value="szklanka">szklanka</option>
+                                <option value="szczypta">szczypta</option>
+                            </select>
                         </div>
+                    </div>
 
-                        <!-- Wartości odżywcze -->
-                        <div class="mb-3">
-                            <a class="small text-decoration-none" data-bs-toggle="collapse" href="#nutrition-fields"
-                                role="button" aria-expanded="false">
-                                🥗 Dodaj wartości odżywcze (opcjonalnie)
-                            </a>
-                            <div class="collapse mt-2" id="nutrition-fields">
-                                <div class="card card-body bg-light py-2 px-3">
-                                    <p class="small text-muted mb-2">Wartości na 100g/100ml:</p>
-                                    <div class="row g-2">
-                                        <div class="col-6 col-md-4">
-                                            <label class="form-label small" for="new-ingredient-calories">Kalorie
-                                                (kcal)</label>
-                                            <input type="number" class="form-control form-control-sm"
-                                                id="new-ingredient-calories" min="0" step="0.1" placeholder="0">
-                                        </div>
-                                        <div class="col-6 col-md-4">
-                                            <label class="form-label small" for="new-ingredient-protein">Białko
-                                                (g)</label>
-                                            <input type="number" class="form-control form-control-sm"
-                                                id="new-ingredient-protein" min="0" step="0.1" placeholder="0">
-                                        </div>
-                                        <div class="col-6 col-md-4">
-                                            <label class="form-label small" for="new-ingredient-carbs">Węglowodany
-                                                (g)</label>
-                                            <input type="number" class="form-control form-control-sm"
-                                                id="new-ingredient-carbs" min="0" step="0.1" placeholder="0">
-                                        </div>
-                                        <div class="col-6 col-md-4">
-                                            <label class="form-label small" for="new-ingredient-fat">Tłuszcze
-                                                (g)</label>
-                                            <input type="number" class="form-control form-control-sm"
-                                                id="new-ingredient-fat" min="0" step="0.1" placeholder="0">
-                                        </div>
-                                        <div class="col-6 col-md-4">
-                                            <label class="form-label small" for="new-ingredient-fiber">Błonnik
-                                                (g)</label>
-                                            <input type="number" class="form-control form-control-sm"
-                                                id="new-ingredient-fiber" min="0" step="0.1" placeholder="0">
-                                        </div>
+                    <button type="button" class="btn btn-primary w-100" id="add-selected-ingredient" disabled>Dodaj do przepisu</button>
+
+                    <hr class="my-4">
+
+                    <p class="text-muted small mb-2">Nie znalazłeś składnika na liście?</p>
+                    <button type="button" class="btn btn-outline-secondary w-100" id="show-new-ingredient-form">Utwórz nowy składnik</button>
+                </div>
+
+                <div id="new-ingredient-section" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label" for="new-ingredient-name-input">Nazwa nowego składnika</label>
+                        <input type="text" class="form-control" id="new-ingredient-name-input" placeholder="np. tofu">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="new-ingredient-category">Kategoria (opcjonalnie)</label>
+                        <input type="text" class="form-control" id="new-ingredient-category" placeholder="np. nabiał, warzywa">
+                    </div>
+
+                    <div class="mb-3">
+                        <a class="small text-decoration-none" data-bs-toggle="collapse" href="#nutrition-fields" role="button" aria-expanded="false">
+                            🥗 Dodaj wartości odżywcze (opcjonalnie)
+                        </a>
+                        <div class="collapse mt-2" id="nutrition-fields">
+                            <div class="card card-body bg-light py-2 px-3">
+                                <p class="small text-muted mb-2">Wartości na 100g/100ml:</p>
+                                <div class="row g-2">
+                                    <div class="col-6 col-md-4">
+                                        <label class="form-label small" for="new-ingredient-calories">Kalorie (kcal)</label>
+                                        <input type="number" class="form-control form-control-sm" id="new-ingredient-calories" min="0" step="0.1" placeholder="0">
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <label class="form-label small" for="new-ingredient-protein">Białko (g)</label>
+                                        <input type="number" class="form-control form-control-sm" id="new-ingredient-protein" min="0" step="0.1" placeholder="0">
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <label class="form-label small" for="new-ingredient-carbs">Węglowodany (g)</label>
+                                        <input type="number" class="form-control form-control-sm" id="new-ingredient-carbs" min="0" step="0.1" placeholder="0">
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <label class="form-label small" for="new-ingredient-fat">Tłuszcze (g)</label>
+                                        <input type="number" class="form-control form-control-sm" id="new-ingredient-fat" min="0" step="0.1" placeholder="0">
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <label class="form-label small" for="new-ingredient-fiber">Błonnik (g)</label>
+                                        <input type="number" class="form-control form-control-sm" id="new-ingredient-fiber" min="0" step="0.1" placeholder="0">
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-secondary flex-grow-1" id="back-to-select">
-                                ← Wróć
-                            </button>
-                            <button type="button" class="btn btn-success flex-grow-1" id="create-new-ingredient">
-                                Utwórz składnik
-                            </button>
-                        </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary flex-grow-1" id="back-to-select">← Wróć</button>
+                        <button type="button" class="btn btn-success flex-grow-1" id="create-new-ingredient">Utwórz składnik</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const ingredientsList = document.getElementById('added-ingredients-list');
-            const noIngredientsMsg = document.getElementById('no-ingredients-message');
-            const ingredientSelectEl = document.getElementById('modal-ingredient-select');
-            const amountInput = document.getElementById('modal-ingredient-amount');
-            const unitSelect = document.getElementById('modal-ingredient-unit');
-            const addBtn = document.getElementById('add-selected-ingredient');
-            const selectSection = document.getElementById('select-ingredient-section');
-            const newIngredientSection = document.getElementById('new-ingredient-section');
-            const showNewFormBtn = document.getElementById('show-new-ingredient-form');
-            const backToSelectBtn = document.getElementById('back-to-select');
-            const createNewBtn = document.getElementById('create-new-ingredient');
-            const newIngredientNameInput = document.getElementById('new-ingredient-name-input');
-            const newIngredientCategoryInput = document.getElementById('new-ingredient-category');
-            const modal = document.getElementById('ingredientModal');
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const pageState = document.getElementById('recipe-page-state');
+        const recipeModalEl = document.getElementById('recipeModal');
+        const detailModalEl = document.getElementById('recipeDetailModal');
 
-            // Inicjalizacja Tom Select
-            const ingredientSelect = new TomSelect('#modal-ingredient-select', {
+        if (pageState && pageState.dataset.openEdit === 'true' && recipeModalEl) {
+            new bootstrap.Modal(recipeModalEl).show();
+        }
+
+        if (pageState && pageState.dataset.openDetail === 'true' && detailModalEl) {
+            new bootstrap.Modal(detailModalEl).show();
+        }
+
+        const ingredientsList = document.getElementById('added-ingredients-list');
+        if (!ingredientsList) return;
+
+        const noIngredientsMsg = document.getElementById('no-ingredients-message');
+        const ingredientSelectEl = document.getElementById('modal-ingredient-select');
+        const amountInput = document.getElementById('modal-ingredient-amount');
+        const unitSelect = document.getElementById('modal-ingredient-unit');
+        const addBtn = document.getElementById('add-selected-ingredient');
+        const selectSection = document.getElementById('select-ingredient-section');
+        const newIngredientSection = document.getElementById('new-ingredient-section');
+        const showNewFormBtn = document.getElementById('show-new-ingredient-form');
+        const backToSelectBtn = document.getElementById('back-to-select');
+        const createNewBtn = document.getElementById('create-new-ingredient');
+        const newIngredientNameInput = document.getElementById('new-ingredient-name-input');
+        const newIngredientCategoryInput = document.getElementById('new-ingredient-category');
+        const ingredientModal = document.getElementById('ingredientModal');
+
+        function updateAddButtonState() {
+            if (!ingredientSelectEl || !amountInput || !addBtn) return;
+            const hasIngredient = ingredientSelectEl.value !== '';
+            const hasAmount = amountInput.value !== '' && parseFloat(amountInput.value) > 0;
+            addBtn.disabled = !(hasIngredient && hasAmount);
+        }
+
+        function updateNoIngredientsMessage() {
+            if (!noIngredientsMsg) return;
+            const hasIngredients = ingredientsList.querySelectorAll('.ingredient-item').length > 0;
+            noIngredientsMsg.style.display = hasIngredients ? 'none' : 'block';
+        }
+
+        let ingredientSelect = null;
+        if (ingredientSelectEl) {
+            ingredientSelect = new TomSelect('#modal-ingredient-select', {
                 placeholder: 'Wpisz nazwę składnika...',
                 highlight: true,
                 searchField: ['text'],
@@ -271,10 +405,7 @@
                 render: {
                     option: function (data, escape) {
                         const category = data.$option?.dataset?.category;
-                        return `<div>
-                    <span class="fw-medium">${escape(data.$option?.dataset?.name || data.text)}</span>
-                    ${category ? `<span class="text-muted small"> (${escape(category)})</span>` : ''}
-                </div>`;
+                        return `<div><span class="fw-medium">${escape(data.$option?.dataset?.name || data.text)}</span>${category ? `<span class="text-muted small"> (${escape(category)})</span>` : ''}</div>`;
                     },
                     item: function (data, escape) {
                         return `<div>${escape(data.$option?.dataset?.name || data.text)}</div>`;
@@ -291,24 +422,13 @@
                     updateAddButtonState();
                 }
             });
+        }
 
-            // Aktualizuj stan przycisku "Dodaj"
-            function updateAddButtonState() {
-                const hasIngredient = ingredientSelect.getValue() !== '';
-                const hasAmount = amountInput.value !== '' && parseFloat(amountInput.value) > 0;
-                addBtn.disabled = !(hasIngredient && hasAmount);
-            }
+        if (amountInput) amountInput.addEventListener('input', updateAddButtonState);
 
-            // Aktualizuj widoczność komunikatu "brak składników"
-            function updateNoIngredientsMessage() {
-                const hasIngredients = ingredientsList.querySelectorAll('.ingredient-item').length > 0;
-                noIngredientsMsg.style.display = hasIngredients ? 'none' : 'block';
-            }
-
-            amountInput.addEventListener('input', updateAddButtonState);
-
-            // Dodaj wybrany składnik do listy
+        if (addBtn) {
             addBtn.addEventListener('click', function () {
+                if (!ingredientSelect) return;
                 const ingredientId = ingredientSelect.getValue();
                 const option = ingredientSelectEl.querySelector(`option[value="${ingredientId}"]`);
                 const ingredientName = option?.dataset?.name || '';
@@ -317,69 +437,65 @@
 
                 if (!ingredientId || !amount) return;
 
-                // Sprawdź czy składnik już jest dodany
                 const existing = ingredientsList.querySelector(`input[name="ingredient_id"][value="${ingredientId}"]`);
                 if (existing) {
                     alert('Ten składnik jest już dodany do przepisu.');
                     return;
                 }
 
-                // Utwórz element składnika
                 const item = document.createElement('div');
                 item.className = 'ingredient-item d-flex align-items-center gap-2 mb-2 p-2 bg-white rounded border';
                 item.innerHTML = `
-            <input type="hidden" name="ingredient_id" value="${ingredientId}">
-            <input type="hidden" name="ingredient_amount" value="${amount}">
-            <input type="hidden" name="ingredient_unit" value="${unit}">
-            <span class="flex-grow-1">
-                <strong>${ingredientName}</strong>
-                <span class="text-muted">— ${amount} ${unit}</span>
-            </span>
-            <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient" title="Usuń">×</button>
-        `;
+                    <input type="hidden" name="ingredient_id" value="${ingredientId}">
+                    <input type="hidden" name="ingredient_amount" value="${amount}">
+                    <input type="hidden" name="ingredient_unit" value="${unit}">
+                    <span class="flex-grow-1"><strong>${ingredientName}</strong> <span class="text-muted">— ${amount} ${unit}</span></span>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-ingredient" title="Usuń">×</button>
+                `;
 
                 ingredientsList.appendChild(item);
                 updateNoIngredientsMessage();
-
-                // Reset formularza w modalu
                 ingredientSelect.clear();
                 amountInput.value = '';
                 unitSelect.value = 'g';
                 updateAddButtonState();
-
-                // Zamknij modal
-                bootstrap.Modal.getInstance(modal).hide();
+                bootstrap.Modal.getInstance(ingredientModal).hide();
             });
+        }
 
-            // Usuwanie składnika z listy
-            ingredientsList.addEventListener('click', function (e) {
-                const removeBtn = e.target.closest('.remove-ingredient');
+        if (ingredientsList) {
+            ingredientsList.addEventListener('click', function (event) {
+                const removeBtn = event.target.closest('.remove-ingredient');
                 if (removeBtn) {
                     removeBtn.closest('.ingredient-item').remove();
                     updateNoIngredientsMessage();
                 }
             });
+        }
 
-            // Przełączanie między wyborem a tworzeniem składnika
+        if (showNewFormBtn) {
             showNewFormBtn.addEventListener('click', function () {
-                selectSection.style.display = 'none';
-                newIngredientSection.style.display = 'block';
-                newIngredientNameInput.focus();
+                if (selectSection) selectSection.style.display = 'none';
+                if (newIngredientSection) newIngredientSection.style.display = 'block';
+                if (newIngredientNameInput) newIngredientNameInput.focus();
             });
+        }
 
+        if (backToSelectBtn) {
             backToSelectBtn.addEventListener('click', function () {
-                newIngredientSection.style.display = 'none';
-                selectSection.style.display = 'block';
-                newIngredientNameInput.value = '';
-                newIngredientCategoryInput.value = '';
+                if (newIngredientSection) newIngredientSection.style.display = 'none';
+                if (selectSection) selectSection.style.display = 'block';
+                if (newIngredientNameInput) newIngredientNameInput.value = '';
+                if (newIngredientCategoryInput) newIngredientCategoryInput.value = '';
                 document.getElementById('new-ingredient-calories').value = '';
                 document.getElementById('new-ingredient-protein').value = '';
                 document.getElementById('new-ingredient-carbs').value = '';
                 document.getElementById('new-ingredient-fat').value = '';
                 document.getElementById('new-ingredient-fiber').value = '';
             });
+        }
 
-            // Tworzenie nowego składnika przez AJAX
+        if (createNewBtn) {
             createNewBtn.addEventListener('click', function () {
                 const name = newIngredientNameInput.value.trim();
                 const category = newIngredientCategoryInput.value.trim();
@@ -389,14 +505,12 @@
                     return;
                 }
 
-                // Wyślij żądanie AJAX
                 const formData = new FormData();
                 formData.append('action', 'create_ingredient');
                 formData.append('name', name);
                 formData.append('category', category);
                 formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
 
-                // Dodaj wartości odżywcze jeśli podano
                 const calories = document.getElementById('new-ingredient-calories').value;
                 const protein = document.getElementById('new-ingredient-protein').value;
                 const carbs = document.getElementById('new-ingredient-carbs').value;
@@ -411,577 +525,92 @@
 
                 fetch('{% url "recipes:index" %}', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
                 })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success) {
-                            // Dodaj nowy składnik do Tom Select
-                            const displayText = data.name + (data.category ? ` (${data.category})` : '');
-                            ingredientSelect.addOption({
-                                value: data.id,
-                                text: displayText,
-                                $option: {
-                                    dataset: {
-                                        name: data.name,
-                                        unit: data.default_unit || 'g',
-                                        category: data.category || ''
-                                    }
-                                }
-                            });
-
-                            // Dodaj też do natywnego selecta (dla renderowania)
-                            const nativeOption = document.createElement('option');
-                            nativeOption.value = data.id;
-                            nativeOption.dataset.name = data.name;
-                            nativeOption.dataset.unit = data.default_unit || 'g';
-                            nativeOption.dataset.category = data.category || '';
-                            nativeOption.textContent = displayText;
-                            ingredientSelectEl.appendChild(nativeOption);
-
-                            // Wybierz nowo utworzony składnik
-                            ingredientSelect.setValue(data.id);
-
-                            // Wróć do widoku wyboru i wyczyść formularz
-                            newIngredientSection.style.display = 'none';
-                            selectSection.style.display = 'block';
-                            newIngredientNameInput.value = '';
-                            newIngredientCategoryInput.value = '';
-                            document.getElementById('new-ingredient-calories').value = '';
-                            document.getElementById('new-ingredient-protein').value = '';
-                            document.getElementById('new-ingredient-carbs').value = '';
-                            document.getElementById('new-ingredient-fat').value = '';
-                            document.getElementById('new-ingredient-fiber').value = '';
-
-                            updateAddButtonState();
-                            amountInput.focus();
-                        } else {
+                        if (!data.success) {
                             alert(data.error || 'Wystąpił błąd podczas tworzenia składnika.');
+                            return;
                         }
+
+                        const displayText = data.name + (data.category ? ` (${data.category})` : '');
+                        ingredientSelect.addOption({
+                            value: data.id,
+                            text: displayText,
+                            $option: {
+                                dataset: {
+                                    name: data.name,
+                                    unit: data.default_unit || 'g',
+                                    category: data.category || '',
+                                }
+                            }
+                        });
+
+                        const nativeOption = document.createElement('option');
+                        nativeOption.value = data.id;
+                        nativeOption.dataset.name = data.name;
+                        nativeOption.dataset.unit = data.default_unit || 'g';
+                        nativeOption.dataset.category = data.category || '';
+                        nativeOption.textContent = displayText;
+                        ingredientSelectEl.appendChild(nativeOption);
+
+                        ingredientSelect.setValue(data.id);
+                        if (newIngredientSection) newIngredientSection.style.display = 'none';
+                        if (selectSection) selectSection.style.display = 'block';
+                        if (newIngredientNameInput) newIngredientNameInput.value = '';
+                        if (newIngredientCategoryInput) newIngredientCategoryInput.value = '';
+                        document.getElementById('new-ingredient-calories').value = '';
+                        document.getElementById('new-ingredient-protein').value = '';
+                        document.getElementById('new-ingredient-carbs').value = '';
+                        document.getElementById('new-ingredient-fat').value = '';
+                        document.getElementById('new-ingredient-fiber').value = '';
+                        updateAddButtonState();
+                        if (amountInput) amountInput.focus();
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('Wystąpił błąd podczas tworzenia składnika.');
                     });
             });
+        }
 
-            // Reset modalu po zamknięciu
-            modal.addEventListener('hidden.bs.modal', function () {
-                newIngredientSection.style.display = 'none';
-                selectSection.style.display = 'block';
-                ingredientSelect.clear();
-                amountInput.value = '';
-                unitSelect.value = 'g';
-                newIngredientNameInput.value = '';
-                newIngredientCategoryInput.value = '';
+        if (ingredientModal) {
+            ingredientModal.addEventListener('hidden.bs.modal', function () {
+                if (newIngredientSection) newIngredientSection.style.display = 'none';
+                if (selectSection) selectSection.style.display = 'block';
+                if (ingredientSelect) ingredientSelect.clear();
+                if (amountInput) amountInput.value = '';
+                if (unitSelect) unitSelect.value = 'g';
+                if (newIngredientNameInput) newIngredientNameInput.value = '';
+                if (newIngredientCategoryInput) newIngredientCategoryInput.value = '';
                 document.getElementById('new-ingredient-calories').value = '';
                 document.getElementById('new-ingredient-protein').value = '';
                 document.getElementById('new-ingredient-carbs').value = '';
                 document.getElementById('new-ingredient-fat').value = '';
                 document.getElementById('new-ingredient-fiber').value = '';
-                // Zwiń sekcję wartości odżywczych
-                const nutritionCollapse = document.getElementById('nutrition-fields');
-                if (nutritionCollapse.classList.contains('show')) {
-                    new bootstrap.Collapse(nutritionCollapse, { toggle: true });
-                }
                 updateAddButtonState();
             });
-
-            // Inicjalizacja
-            updateNoIngredientsMessage();
-        });
-    </script>
-
-    <div class="col-lg-7">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="h3 fw-bold mb-0">Lista przepisów</h2>
-                    <div class="d-flex align-items-center gap-2">
-                        <form class="d-flex" method="get" action="{% url 'recipes:index' %}">
-                            <div class="input-group input-group-sm">
-                                <input id="recipe-search" name="q" type="search" class="form-control"
-                                    placeholder="Szukaj przepisów..." value="{{ query|default:'' }}">
-                                <button class="btn btn-outline-secondary" type="submit">Szukaj</button>
-                            </div>
-                        </form>
-                        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal"
-                            data-bs-target="#importModal">
-                            📥 Importuj
-                        </button>
-                        <span id="recipes-count" class="badge bg-light text-dark">{{ recipes|length }} pozycji</span>
-                    </div>
-                </div>
-
-                {% if recipes %}
-                <div class="list-group">
-                    {% for recipe in recipes %}
-                    <div data-recipe-name="{{ recipe.name|lower }}"
-                        class="list-group-item px-0 py-3 border-0 border-bottom">
-                        <div class="d-flex justify-content-between gap-3 align-items-start">
-
-                            <div class="flex-grow-1">
-                                <h3 class="h6 fw-bold mb-1">{{ recipe.name }}</h3>
-                                <p class="text-muted small mb-2">{{ recipe.description|default:"Brak opisu" }}</p>
-                                <div class="small text-muted">
-                                    <span class="me-3">⏱ {{ recipe.preparation_time }} min</span>
-                                    <span class="me-3">👥 {{ recipe.servings }} porc.</span>
-                                    {% if recipe.category %}<span>{{ recipe.category }}</span>{% endif %}
-                                </div>
-                                {% if recipe.ingredients.all %}
-                                <div class="mt-2">
-                                    <span class="fw-semibold small">Składniki:</span>
-                                    <ul class="small mb-0 ps-3">
-                                        {% for relation in recipe.ingredients.all %}
-                                        <li class="text-muted"><strong>{{ relation.ingredient.name }}</strong> -
-                                            {{ relation.amount|floatformat:"-2" }} {{ relation.unit }}
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                                {% endif %}
-                                {% if recipe.instructions %}
-                                <div class="mt-2">
-                                    <a class="fw-semibold small text-decoration-none" data-bs-toggle="collapse"
-                                        href="#instructions-{{ recipe.pk }}" role="button" aria-expanded="false">
-                                        📋 Pokaż kroki przygotowania
-                                    </a>
-                                    <div class="collapse mt-2" id="instructions-{{ recipe.pk }}">
-                                        <div class="card card-body bg-light py-2 px-3">
-                                            <ol class="mb-0 ps-3 small">
-                                                {% for step in recipe.instructions.splitlines %}
-                                                {% if step.strip %}
-                                                <li>{{ step }}</li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ol>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endif %}
-                                <!-- Wartości odżywcze -->
-                                {% with nutrition=recipe.calculate_nutrition %}
-                                {% if nutrition.total.has_nutrition_data %}
-                                <div class="mt-2">
-                                    <a class="fw-semibold small text-decoration-none" data-bs-toggle="collapse"
-                                        href="#nutrition-{{ recipe.pk }}" role="button" aria-expanded="false">
-                                        🥗 Pokaż wartości odżywcze
-                                    </a>
-                                    <div class="collapse mt-2" id="nutrition-{{ recipe.pk }}">
-                                        <div class="card card-body bg-light py-2 px-3">
-                                            <div class="row small">
-                                                <div class="col-6">
-                                                    <strong>Na porcję (1/{{ nutrition.servings }}):</strong>
-                                                    <ul class="mb-2 ps-3">
-                                                        <li>Kalorie: {{ nutrition.per_serving.calories }} kcal</li>
-                                                        <li>Białko: {{ nutrition.per_serving.protein }} g</li>
-                                                        <li>Węglowodany: {{ nutrition.per_serving.carbohydrates }} g
-                                                        </li>
-                                                        <li>Tłuszcze: {{ nutrition.per_serving.fat }} g</li>
-                                                        <li>Błonnik: {{ nutrition.per_serving.fiber }} g</li>
-                                                    </ul>
-                                                </div>
-                                                <div class="col-6">
-                                                    <strong>Cały przepis:</strong>
-                                                    <ul class="mb-2 ps-3">
-                                                        <li>Kalorie: {{ nutrition.total.calories }} kcal</li>
-                                                        <li>Białko: {{ nutrition.total.protein }} g</li>
-                                                        <li>Węglowodany: {{ nutrition.total.carbohydrates }} g</li>
-                                                        <li>Tłuszcze: {{ nutrition.total.fat }} g</li>
-                                                        <li>Błonnik: {{ nutrition.total.fiber }} g</li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                            {% if nutrition.total.ingredients_without_data > 0 %}
-                                            <div class="text-muted small mt-1">
-                                                ⚠️ {{ nutrition.total.ingredients_without_data }} składnik(ów) nie ma
-                                                uzupełnionych wartości odżywczych
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endif %}
-                                {% endwith %}
-                            </div>
-                            <div class="d-flex gap-2 flex-shrink-0">
-                                <a class="btn btn-outline-primary btn-sm"
-                                    href="{% url 'recipes:index' %}?edit={{ recipe.pk }}">Edytuj</a>
-                                <form method="post" class="d-inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="recipe_id" value="{{ recipe.pk }}">
-                                    <button class="btn btn-outline-danger btn-sm" type="submit">Usuń</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div id="no-recipes-search" class="text-muted" style="display:none;">Brak przepisów pasujących do
-                    zapytania.</div>
-                {% else %}
-                <div class="text-muted">Brak przepisów. Dodaj pierwszy przepis.</div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal importu przepisu -->
-<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="importModalLabel">Importuj przepis</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Wybór źródła importu -->
-                <ul class="nav nav-tabs mb-3" id="importTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="url-tab" data-bs-toggle="tab" data-bs-target="#url-pane"
-                            type="button" role="tab">
-                            🌐 Z adresu URL
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="markdown-tab" data-bs-toggle="tab" data-bs-target="#markdown-pane"
-                            type="button" role="tab">
-                            📝 Z Markdown
-                        </button>
-                    </li>
-                </ul>
-
-                <div class="tab-content" id="importTabsContent">
-                    <!-- Import z URL -->
-                    <div class="tab-pane fade show active" id="url-pane" role="tabpanel">
-                        <div class="mb-3">
-                            <label class="form-label" for="import-url">Adres URL przepisu</label>
-                            <input type="url" class="form-control" id="import-url"
-                                placeholder="https://example.com/przepis-na-ciasto">
-                            <div class="form-text">
-                                Wklej link do strony z przepisem. Obsługiwane są strony używające formatu
-                                schema.org/Recipe.
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Import z Markdown -->
-                    <div class="tab-pane fade" id="markdown-pane" role="tabpanel">
-                        <div class="mb-3">
-                            <label class="form-label" for="import-markdown">Treść przepisu w formacie Markdown</label>
-                            <textarea class="form-control font-monospace" id="import-markdown" rows="12" placeholder="# Nazwa przepisu
-
-Opis przepisu...
-
-## Informacje
-- Czas przygotowania: 30 min
-- Porcje: 4
-- Kategoria: obiad
-
-## Składniki
-- 200g mąki
-- 2 jajka
-- 1 szklanka mleka
-
-## Przygotowanie
-1. Krok pierwszy..."></textarea>
-                            <div class="form-text">
-                                Wklej przepis w formacie Markdown.
-                                <a href="#" data-bs-toggle="collapse" data-bs-target="#markdownHelp">Pokaż przykład
-                                    formatu</a>
-                            </div>
-                            <div class="collapse mt-2" id="markdownHelp">
-                                <div class="card card-body bg-light small">
-                                    <pre class="mb-0"># Nazwa przepisu
-
-Opis przepisu (opcjonalny)
-
-## Informacje
-- Czas przygotowania: 30 min
-- Porcje: 4
-- Kategoria: obiad
-
-## Składniki
-- 200g mąki pszennej
-- 2 szt jajka
-- 1 szklanka mleka
-
-## Przygotowanie
-1. Pierwszy krok...
-2. Drugi krok...</pre>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Podgląd przepisu -->
-                <div id="import-preview" class="d-none">
-                    <hr>
-                    <h6 class="fw-bold">Podgląd przepisu</h6>
-
-                    <div id="import-warnings" class="alert alert-warning d-none mb-3">
-                        <strong>Ostrzeżenia:</strong>
-                        <ul class="mb-0" id="import-warnings-list"></ul>
-                    </div>
-
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 id="preview-name" class="card-title"></h5>
-                            <p id="preview-description" class="card-text text-muted small"></p>
-                            <div class="row g-2 mb-3 small">
-                                <div class="col-auto"><strong>Czas:</strong> <span id="preview-time"></span> min</div>
-                                <div class="col-auto"><strong>Porcje:</strong> <span id="preview-servings"></span></div>
-                                <div class="col-auto"><strong>Kategoria:</strong> <span id="preview-category"></span>
-                                </div>
-                            </div>
-                            <div id="preview-source-url" class="mb-2 small d-none">
-                                <strong>Źródło:</strong> <a href="#" target="_blank" id="preview-source-link"></a>
-                            </div>
-                            <div>
-                                <strong class="small">Składniki:</strong>
-                                <ul id="preview-ingredients" class="small mb-0"></ul>
-                            </div>
-                            <div id="preview-instructions-section" class="mt-3 d-none">
-                                <strong class="small">Kroki przygotowania:</strong>
-                                <ol id="preview-instructions" class="small mb-0"></ol>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Błąd -->
-                <div id="import-error" class="alert alert-danger d-none mt-3"></div>
-
-                <!-- Status ładowania -->
-                <div id="import-loading" class="text-center d-none my-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Ładowanie...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Pobieram i analizuję przepis...</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-                <button type="button" class="btn btn-outline-primary" id="import-preview-btn">Podgląd</button>
-                <button type="button" class="btn btn-success d-none" id="import-confirm-btn">Importuj przepis</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Import functionality
-        const importModal = document.getElementById('importModal');
-        const urlInput = document.getElementById('import-url');
-        const markdownInput = document.getElementById('import-markdown');
-        const previewBtn = document.getElementById('import-preview-btn');
-        const confirmBtn = document.getElementById('import-confirm-btn');
-        const previewDiv = document.getElementById('import-preview');
-        const errorDiv = document.getElementById('import-error');
-        const loadingDiv = document.getElementById('import-loading');
-        const warningsDiv = document.getElementById('import-warnings');
-        const warningsList = document.getElementById('import-warnings-list');
-
-        let currentImportType = 'url';
-        let currentImportContent = '';
-
-        // Nasłuchiwanie na zmianę zakładki
-        document.querySelectorAll('#importTabs button').forEach(btn => {
-            btn.addEventListener('shown.bs.tab', function (e) {
-                currentImportType = e.target.id === 'url-tab' ? 'url' : 'markdown';
-                resetImportState();
-            });
-        });
-
-        function resetImportState() {
-            previewDiv.classList.add('d-none');
-            errorDiv.classList.add('d-none');
-            loadingDiv.classList.add('d-none');
-            warningsDiv.classList.add('d-none');
-            confirmBtn.classList.add('d-none');
-            previewBtn.classList.remove('d-none');
         }
 
-        function showError(message) {
-            errorDiv.textContent = message;
-            errorDiv.classList.remove('d-none');
-            loadingDiv.classList.add('d-none');
-        }
+        updateNoIngredientsMessage();
+        updateAddButtonState();
 
-        function showPreview(data) {
-            loadingDiv.classList.add('d-none');
-            previewDiv.classList.remove('d-none');
-            previewBtn.classList.add('d-none');
-            confirmBtn.classList.remove('d-none');
-
-            const recipe = data.recipe;
-            document.getElementById('preview-name').textContent = recipe.name;
-            document.getElementById('preview-description').textContent = recipe.description || 'Brak opisu';
-            document.getElementById('preview-time').textContent = recipe.preparation_time;
-            document.getElementById('preview-servings').textContent = recipe.servings;
-            document.getElementById('preview-category').textContent = recipe.category || '-';
-
-            if (recipe.source_url) {
-                const sourceDiv = document.getElementById('preview-source-url');
-                const sourceLink = document.getElementById('preview-source-link');
-                sourceDiv.classList.remove('d-none');
-                sourceLink.href = recipe.source_url;
-                sourceLink.textContent = recipe.source_url;
-            } else {
-                document.getElementById('preview-source-url').classList.add('d-none');
-            }
-
-            const ingredientsList = document.getElementById('preview-ingredients');
-            ingredientsList.innerHTML = '';
-            recipe.ingredients.forEach(ing => {
-                const li = document.createElement('li');
-                li.textContent = `${ing.amount} ${ing.unit} ${ing.name}`;
-                ingredientsList.appendChild(li);
-            });
-
-            // Wyświetl kroki przygotowania
-            const instructionsSection = document.getElementById('preview-instructions-section');
-            const instructionsList = document.getElementById('preview-instructions');
-            instructionsList.innerHTML = '';
-
-            if (recipe.instructions && recipe.instructions.trim()) {
-                instructionsSection.classList.remove('d-none');
-                const steps = recipe.instructions.split('\n').filter(step => step.trim());
-                steps.forEach(step => {
-                    const li = document.createElement('li');
-                    li.textContent = step.trim();
-                    instructionsList.appendChild(li);
-                });
-            } else {
-                instructionsSection.classList.add('d-none');
-            }
-
-            // Pokaż ostrzeżenia jeśli są
-            if (data.warnings && data.warnings.length > 0) {
-                warningsDiv.classList.remove('d-none');
-                warningsList.innerHTML = '';
-                data.warnings.forEach(w => {
-                    const li = document.createElement('li');
-                    li.textContent = w;
-                    warningsList.appendChild(li);
-                });
-            } else {
-                warningsDiv.classList.add('d-none');
-            }
-        }
-
-        // Podgląd przepisu
-        previewBtn.addEventListener('click', function () {
-            const content = currentImportType === 'url' ? urlInput.value.trim() : markdownInput.value.trim();
-
-            if (!content) {
-                showError(currentImportType === 'url' ? 'Podaj adres URL przepisu' : 'Wklej treść przepisu w formacie Markdown');
-                return;
-            }
-
-            currentImportContent = content;
-            resetImportState();
-            loadingDiv.classList.remove('d-none');
-
-            const formData = new FormData();
-            formData.append('type', currentImportType);
-            formData.append('content', content);
-            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-
-            fetch('{% url "recipes:import_preview" %}', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showPreview(data);
-                    } else {
-                        showError(data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showError('Wystąpił błąd podczas pobierania przepisu');
-                });
-        });
-
-        // Potwierdzenie importu
-        confirmBtn.addEventListener('click', function () {
-            loadingDiv.classList.remove('d-none');
-            confirmBtn.disabled = true;
-
-            const formData = new FormData();
-            formData.append('type', currentImportType);
-            formData.append('content', currentImportContent);
-            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-
-            fetch('{% url "recipes:import_confirm" %}', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    loadingDiv.classList.add('d-none');
-                    confirmBtn.disabled = false;
-
-                    if (data.success) {
-                        // Zamknij modal i odśwież stronę
-                        bootstrap.Modal.getInstance(importModal).hide();
-                        window.location.reload();
-                    } else {
-                        showError(data.error);
-                        previewDiv.classList.add('d-none');
-                        confirmBtn.classList.add('d-none');
-                        previewBtn.classList.remove('d-none');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    loadingDiv.classList.add('d-none');
-                    confirmBtn.disabled = false;
-                    showError('Wystąpił błąd podczas importu przepisu');
-                });
-        });
-
-        // Reset po zamknięciu modala
-        importModal.addEventListener('hidden.bs.modal', function () {
-            urlInput.value = '';
-            markdownInput.value = '';
-            resetImportState();
-            currentImportContent = '';
-        });
-    });
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
         const input = document.getElementById('recipe-search');
         if (!input) return;
-        const listItems = Array.from(document.querySelectorAll('.list-group .list-group-item'));
-        const countEl = document.getElementById('recipes-count');
+        const listItems = Array.from(document.querySelectorAll('.recipe-card'));
         const noResults = document.getElementById('no-recipes-search');
-
-        function updateCount(visible) {
-            if (!countEl) return;
-            countEl.textContent = visible + ' pozycji';
-        }
 
         function filterOnce() {
             const q = input.value.trim().toLowerCase();
             let visible = 0;
             listItems.forEach(item => {
-                const name = (item.dataset.recipeName || '').toLowerCase();
-                const match = q === '' || name.indexOf(q) !== -1;
-                item.style.display = match ? '' : 'none';
+                const match = q === '' || (item.dataset.recipeName || '').toLowerCase().indexOf(q) !== -1;
+                const wrapper = item.closest('.col-12');
+                if (wrapper) wrapper.style.display = match ? '' : 'none';
                 if (match) visible++;
             });
             if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
-            updateCount(visible);
         }
 
         let timer = null;
@@ -990,8 +619,9 @@ Opis przepisu (opcjonalny)
             timer = setTimeout(filterOnce, 150);
         });
 
-        // run once on load (in case query prefilled)
         filterOnce();
     });
 </script>
+
+<div id="recipe-page-state" data-open-edit="{% if editing_recipe %}true{% else %}false{% endif %}" data-open-detail="{% if detail_recipe %}true{% else %}false{% endif %}" class="d-none"></div>
 {% endblock %}

@@ -4,7 +4,7 @@ Aplikacja do planowania posiłków i zarządzania przepisami kulinarnymi.
 
 ## Postęp projektu
 
-**Zaimplementowane:** 9/15 zadań | **W trakcie:** 0 | **Do zrobienia:** 6
+**Zaimplementowane:** 10/15 zadań | **W trakcie:** 0 | **Do zrobienia:** 5
 
 ---
 
@@ -28,6 +28,7 @@ Aplikacja do planowania posiłków i zarządzania przepisami kulinarnymi.
 | [14](tasks/14.md) | Eksport pojedynczego przepisu | 🟢 Niski | ⬜ Do zrobienia |
 | [15](tasks/15.md) | Ulepszone wyszukiwanie składników | 🟢 Niski | ✅ Zaimplementowane |
 | [16](tasks/16.md) | Ulepszenia UI | 🔴 Wysoki | ✅ Zaimplementowane |
+| [17](tasks/17.md) | Ulepszenia UI przepisy | 🔴 Wysoki | ✅ Zaimplementowane |
 
 ---
 
