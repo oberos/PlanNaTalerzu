@@ -100,6 +100,11 @@ def recipe_index(request):
         recipes_qs = recipes_qs.filter(name__icontains=query)
     ingredients = Ingredient.objects.order_by("name").all()
     editing_recipe = None
+    detail_recipe = None
+
+    detail_id = request.GET.get("recipe")
+    if detail_id:
+        detail_recipe = Recipe.objects.prefetch_related("ingredients__ingredient").get(pk=detail_id)
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -201,6 +206,7 @@ def recipe_index(request):
             "recipes": recipes_qs,
             "ingredients": ingredients,
             "editing_recipe": editing_recipe,
+            "detail_recipe": detail_recipe,
             "query": query,
         },
     )

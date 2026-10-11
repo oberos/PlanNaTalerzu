@@ -139,3 +139,11 @@ class RecipeViewsTest(TestCase):
         self.assertEqual(data["id"], existing.pk)
         # Should not create duplicate
         self.assertEqual(Ingredient.objects.filter(name__iexact="cukinia").count(), 1)
+
+    def test_recipe_index_uses_recipe_modal_and_hides_import_ui(self):
+        response = self.client.get(reverse("recipes:index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Importuj")
+        self.assertContains(response, 'id="recipeModal"')
+        self.assertContains(response, 'data-bs-target="#recipeModal"')
