@@ -356,6 +356,7 @@
         const pageState = document.getElementById('recipe-page-state');
         const recipeModalEl = document.getElementById('recipeModal');
         const detailModalEl = document.getElementById('recipeDetailModal');
+        const ingredientModal = document.getElementById('ingredientModal');
 
         if (pageState && pageState.dataset.openEdit === 'true' && recipeModalEl) {
             new bootstrap.Modal(recipeModalEl).show();
@@ -363,6 +364,42 @@
 
         if (pageState && pageState.dataset.openDetail === 'true' && detailModalEl) {
             new bootstrap.Modal(detailModalEl).show();
+        }
+
+        function clearModalQueryParam(paramName) {
+            const url = new URL(window.location.href);
+            if (!url.searchParams.has(paramName)) {
+                return;
+            }
+            url.searchParams.delete(paramName);
+            window.history.replaceState({}, '', url);
+        }
+
+        if (recipeModalEl) {
+            recipeModalEl.addEventListener('hidden.bs.modal', function () {
+                if (ingredientModal && ingredientModal.classList.contains('show')) {
+                    return;
+                }
+                if (window.location.search.includes('edit=')) {
+                    return;
+                }
+                clearModalQueryParam('edit');
+            });
+        }
+
+        if (detailModalEl) {
+            detailModalEl.addEventListener('hidden.bs.modal', function () {
+                clearModalQueryParam('recipe');
+            });
+        }
+
+        if (ingredientModal) {
+            ingredientModal.addEventListener('hidden.bs.modal', function () {
+                if (recipeModalEl && !recipeModalEl.classList.contains('show')) {
+                    const modal = bootstrap.Modal.getInstance(recipeModalEl) || new bootstrap.Modal(recipeModalEl);
+                    modal.show();
+                }
+            });
         }
 
         const ingredientsList = document.getElementById('added-ingredients-list');
@@ -380,7 +417,6 @@
         const createNewBtn = document.getElementById('create-new-ingredient');
         const newIngredientNameInput = document.getElementById('new-ingredient-name-input');
         const newIngredientCategoryInput = document.getElementById('new-ingredient-category');
-        const ingredientModal = document.getElementById('ingredientModal');
 
         function updateAddButtonState() {
             if (!ingredientSelectEl || !amountInput || !addBtn) return;

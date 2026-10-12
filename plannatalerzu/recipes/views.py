@@ -4,6 +4,7 @@ from itertools import zip_longest
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from .import_utils import (
     ParsedRecipe,
@@ -191,6 +192,9 @@ def recipe_index(request):
 
             if recipe is not None:
                 _add_recipe_ingredients_from_post(recipe, request)
+
+        if action == "update" and recipe is not None:
+            return redirect("recipes:index")
 
         return redirect("recipes:index")
 
