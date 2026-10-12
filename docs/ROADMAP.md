@@ -42,6 +42,7 @@ Aplikacja do planowania posiłków i zarządzania przepisami kulinarnymi.
 | [B4](tasks/B4.md) | SECRET_KEY w settings.py | 🔴 Wysoki | ⬜ Do naprawienia |
 | [B5](tasks/B5.md) | Nie można dodać składnika z przepisu | 🔴 Wysoki | ✅ Naprawione |
 | [B6](tasks/B6.md) | Grupowanie składników na liście zakupów | 🟡 Średni | ✅ Naprawione |
+| [B7](tasks/B7.md) | Składniki nie dodają się do przepisu podczas edycji | 🔴 Wysoki | ✅ Naprawione |
 
 ---
 

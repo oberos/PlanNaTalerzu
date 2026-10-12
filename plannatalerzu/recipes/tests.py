@@ -103,6 +103,36 @@ class RecipeViewsTest(TestCase):
         self.assertTrue(RecipeIngredient.objects.filter(recipe=recipe, ingredient=new_ingredient).exists())
         self.assertFalse(RecipeIngredient.objects.filter(recipe=recipe, ingredient=old_ingredient).exists())
 
+    def test_edit_recipe_redirects_to_recipe_list_after_update(self):
+        """After editing, user should return to the recipe list instead of staying on the detail modal."""
+        recipe = Recipe.objects.create(
+            name="Sałatka",
+            description="Opis",
+            preparation_time=10,
+            servings=2,
+            category="salad",
+        )
+        ingredient = Ingredient.objects.create(name="pomidor", default_unit="g")
+
+        response = self.client.post(
+            reverse("recipes:index"),
+            {
+                "action": "update",
+                "recipe_id": recipe.pk,
+                "name": "Sałatka z pomidorem",
+                "description": "Nowy opis",
+                "preparation_time": 15,
+                "servings": 2,
+                "category": "meal",
+                "ingredient_id": [str(ingredient.pk)],
+                "ingredient_amount": ["150"],
+                "ingredient_unit": ["g"],
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("recipes:index"))
+
     def test_create_ingredient_ajax(self):
         """Test AJAX endpoint for creating new ingredient."""
         response = self.client.post(
